@@ -112,3 +112,19 @@ app.post('/account/signin', async (req, res) => {
     }
   });
 });
+
+app.put('/account/profile', async (req, res) => {
+  console.log('PUT /account/profile called');
+
+  const { mobileNumber, email, userId } = req.body;
+
+  const updateQuery = 'UPDATE users SET phone = ?, email = ? WHERE user_id = ?';
+  db.query(updateQuery, [mobileNumber, email, userId], (err, results) => {
+    if (err) {
+      console.log(err);
+      res.status(500).json({ message: err.toString() });
+    } else {
+      res.status(200).json({ message: 'User data updated successfully' });
+    }
+  });
+});

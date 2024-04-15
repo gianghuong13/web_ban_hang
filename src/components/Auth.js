@@ -1,5 +1,6 @@
 import React, { } from "react";
-  
+import { jwtDecode } from 'jwt-decode';
+
 import {
     Navigate ,
     useLocation
@@ -28,4 +29,19 @@ export function RequireToken({children}) {
 export const logout = () => {
   localStorage.removeItem('Token');
   window.location.reload();
+}
+
+export const fetchUserId = () => {
+  const token = fetchToken();
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const decoded = jwtDecode(token);
+    return decoded.user_id; // replace 'user_id' with the actual key in your token's payload
+  } catch (error) {
+    console.error('An error occurred while decoding the token:', error);
+    return null;
+  }
 }

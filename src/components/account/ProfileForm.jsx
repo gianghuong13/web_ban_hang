@@ -3,6 +3,7 @@ import { Field, reduxForm } from "redux-form";
 import { compose } from "redux";
 import renderFormGroupField from "../../helpers/renderFormGroupField";
 import renderFormFileInput from "../../helpers/renderFormFileInput";
+import {fetchToken, fetchUserId} from "../Auth";
 import {
   required,
   maxLengthMobileNo,
@@ -17,6 +18,37 @@ import { ReactComponent as IconEnvelop } from "bootstrap-icons/icons/envelope.sv
 import { ReactComponent as IconGeoAlt } from "bootstrap-icons/icons/geo-alt.svg";
 import { ReactComponent as IconCalendarEvent } from "bootstrap-icons/icons/calendar-event.svg";
 
+const handleSubmit = async (event) => {
+  console.log('handleSubmit called');
+
+  event.preventDefault();
+
+  const mobileNumber = event.target.elements.mobileNumber.value;
+  const email = event.target.elements.email.value;
+  const userId = fetchUserId();
+  console.log('userId:', userId);
+  
+  const response = await fetch('http://localhost:5000/account/profile', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${fetchToken()}` // assuming your API uses bearer token authentication
+    },
+    body: JSON.stringify({
+      mobileNumber,
+      email,
+      userId,
+    })
+  });
+
+  if (response.ok) {
+    const data = await response.json();
+    console.log(data.message);
+  } else {
+    console.error(`HTTP error! status: ${response.status}`);
+  }
+}
+
 const ProfileForm = (props) => {
   const {
     handleSubmit,
@@ -28,7 +60,7 @@ const ProfileForm = (props) => {
   } = props;
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit}
       className={`needs-validation ${submitFailed ? "was-validated" : ""}`}
       noValidate
     >
@@ -36,39 +68,10 @@ const ProfileForm = (props) => {
         <h6 className="card-header">
           <i className="bi bi-person-lines-fill" /> Profile Detail
         </h6>
-        <img
-          src={imagePreview ? imagePreview : "../../images/NO_IMG.png"}
-          alt=""
-          className="card-img-top rounded-0 img-fluid bg-secondary"
-        />
-        <div className="card-body">
-          <Field
-            name="formFile"
-            component={renderFormFileInput}
-            onImageChange={onImageChange}
-            validate={[required]}
-            tips="You don't allow uploading a photo more than 5MB"
-          />
-          <p className="card-text">
-            With supporting text below as a natural lead-in to additional
-            content.
-          </p>
-        </div>
         <ul className="list-group list-group-flush">
           <li className="list-group-item">
             <Field
-              name="name"
-              type="text"
-              component={renderFormGroupField}
-              placeholder="Your name"
-              icon={IconPerson}
-              validate={[required, name]}
-              required={true}
-            />
-          </li>
-          <li className="list-group-item">
-            <Field
-              name="mobileNo"
+              name="mobileNumber"
               type="number"
               component={renderFormGroupField}
               placeholder="Mobile no without country code"
@@ -90,34 +93,12 @@ const ProfileForm = (props) => {
               required={true}
             />
           </li>
-          <li className="list-group-item">
-            <Field
-              name="location"
-              type="text"
-              component={renderFormGroupField}
-              placeholder="Your location"
-              icon={IconGeoAlt}
-              validate={[required]}
-              required={true}
-            />
-          </li>
-          <li className="list-group-item">
-            <Field
-              name="dob"
-              type="date"
-              component={renderFormGroupField}
-              placeholder="Your birthdate"
-              icon={IconCalendarEvent}
-              validate={[required]}
-              required={true}
-            />
-          </li>
         </ul>
         <div className="card-body">
           <button
-            type="submit"
-            className="btn btn-primary  d-flex"
-            disabled={submitting}
+          type="submit"
+          className="btn btn-primary d-flex"
+          disabled={submitting}
           >
             Submit
           </button>
