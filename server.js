@@ -47,6 +47,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use(session({
+  key:'userId',
   secret: 'your-secret-key',
   resave: false,
   saveUninitialized: true,
@@ -139,6 +140,18 @@ app.post('/account/signin', async (req, res) => {
         res.status(400).json({ message: 'User not found' });
         return res.json({Login: false});
       }
+    }
+  });
+});
+
+app.get('/account/signout', (req, res) => {
+  // Destroy the session
+  req.session.destroy(err => {
+    if (err) {
+      console.error('Error destroying session:', err);
+      res.status(500).send('Error logging out');
+    } else {
+      res.send('Logout successful');
     }
   });
 });

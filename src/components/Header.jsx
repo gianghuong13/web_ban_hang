@@ -1,10 +1,24 @@
 import { lazy } from "react";
 import { Link } from "react-router-dom";
 import { logout } from "./Auth";
+import React, { useEffect, useState } from "react";
+import axios from 'axios';
+
 
 const Search = lazy(() => import("./Search"));
 
 const Header = () => {
+  const [username, setUsername] = useState(null);
+  const handleLogout = () => {
+    axios.get('http://localhost:5000/account/signout', { withCredentials: true })
+      .then(() => {
+        setUsername(null);
+        window.location.reload();
+      })
+      .catch(err => {
+        console.error('Error logging out:', err);
+      });
+  };
   return (
     <header className="p-3 border-bottom bg-light">
       <div className="container-fluid">
@@ -77,7 +91,7 @@ const Header = () => {
                   <hr className="dropdown-divider" />
                 </li>
                 <li>
-                <Link className="dropdown-item" to="/" onClick={logout}>
+                <Link className="dropdown-item" to="/" onClick={handleLogout}>
                 <i className="bi bi-door-closed-fill text-danger"></i>
                 Logout
                 </Link>

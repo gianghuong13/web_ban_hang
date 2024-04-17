@@ -20,8 +20,8 @@ export function RequireToken({ children }) {
 }
 
 export const logout = () => {
-    Cookies.remove('sessionId', { path: '/' });
-    window.location.reload();
+  Cookies.remove('userId', { path: '/' });
+  window.location.reload();
 }
 
 export const fetchUser = async () => {

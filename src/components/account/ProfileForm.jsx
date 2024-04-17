@@ -19,36 +19,6 @@ import { ReactComponent as IconEnvelop } from "bootstrap-icons/icons/envelope.sv
 import { ReactComponent as IconGeoAlt } from "bootstrap-icons/icons/geo-alt.svg";
 import { ReactComponent as IconCalendarEvent } from "bootstrap-icons/icons/calendar-event.svg";
 
-const handleSubmit = async (event) => {
-  console.log('handleSubmit called');
-
-  event.preventDefault();
-
-  const mobileNumber = event.target.elements.mobileNumber.value;
-  const email = event.target.elements.email.value;
-  const userId = fetchToken();
-  console.log('userId:', userId);
-  
-  const response = await fetch('http://localhost:5000/account/profile', {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${fetchToken()}` // assuming your API uses bearer token authentication
-    },
-    body: JSON.stringify({
-      mobileNumber,
-      email,
-      userId,
-    })
-  });
-
-  if (response.ok) {
-    const data = await response.json();
-    console.log(data.message);
-  } else {
-    console.error(`HTTP error! status: ${response.status}`);
-  }
-}
 
 const ProfileForm = (props) => {
   const {
