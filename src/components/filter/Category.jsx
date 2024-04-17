@@ -1,7 +1,21 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
-const FilterCategory = (props) => {
+const FilterCategory = () => {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    //endpoint to fetch categories
+    fetch('http://localhost:3001/api/categories')
+      .then(response => response.json())
+      .then(data => {
+        setCategories(data);
+      })
+      .catch(error => {
+        console.error('Error fetching categories', error);
+      });
+  }, []);
+
   return (
     <div className="card mb-3 accordion">
       <div
@@ -17,36 +31,13 @@ const FilterCategory = (props) => {
         className="list-group list-group-flush show"
         id="filterCategory"
       >
-        <li className="list-group-item">
-          <Link to="/" className="text-decoration-none stretched-link">
-            Clothing
-          </Link>
-        </li>
-        <li className="list-group-item">
-          <Link to="/" className="text-decoration-none stretched-link">
-            Leather Bag
-          </Link>
-        </li>
-        <li className="list-group-item">
-          <Link to="/" className="text-decoration-none stretched-link">
-            Trausers
-          </Link>
-        </li>
-        <li className="list-group-item">
-          <Link to="/" className="text-decoration-none stretched-link">
-            Sweater & Cardigans
-          </Link>
-        </li>
-        <li className="list-group-item">
-          <Link to="/" className="text-decoration-none stretched-link">
-            High Heels
-          </Link>
-        </li>
-        <li className="list-group-item">
-          <Link to="/" className="text-decoration-none stretched-link">
-            Coats & Jackets
-          </Link>
-        </li>
+        {categories.map((category, index) => (
+          <li key={index} className="list-group-item">
+            <Link to="/" className="text-decoration-none stretched-link">
+              {category}
+            </Link>
+          </li>
+        ))}
       </ul>
     </div>
   );
