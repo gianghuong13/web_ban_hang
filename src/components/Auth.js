@@ -1,47 +1,43 @@
-import React, { } from "react";
-import { jwtDecode } from 'jwt-decode';
-
+import React from "react";
+import Cookies from 'js-cookie';
 import {
-    Navigate ,
+    Navigate,
     useLocation
-  } from "react-router-dom";
-export const setToken = (token) =>{
-    // set token in localStorage
-    localStorage.setItem('Token', token)
+} from "react-router-dom";
+
+export const fetchToken = () => {
+    return Cookies.get('sessionId');
 }
-export const fetchToken = (token) =>{
-    // fetch the token
-    return localStorage.getItem('Token')
-}
-export function RequireToken({children}) {
-      
-    let auth = fetchToken()
-    let location = useLocation();
-    
+
+export function RequireToken({ children }) {
+    const auth = fetchToken();
+    const location = useLocation();
+
     if (!auth) {
-        
-      return <Navigate to="/account/login" state={{ from: location }} />;
+        return <Navigate to="/account/login" state={{ from: location }} />;
     }
-    
     return children;
 }
 
 export const logout = () => {
-  localStorage.removeItem('Token');
-  window.location.reload();
+    Cookies.remove('sessionId', { path: '/' });
+    window.location.reload();
 }
 
-export const fetchUserId = () => {
-  const token = fetchToken();
-  if (!token) {
-    return null;
-  }
+export const fetchUser = async () => {
+    const response = await fetch('/account/signin', {
+        credentials: 'include', // Include cookies in the request
+    });
+    
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    
+    const data = await response.json();
+    return data.user;
+};
 
-  try {
-    const decoded = jwtDecode(token);
-    return decoded.user_id; // replace 'user_id' with the actual key in your token's payload
-  } catch (error) {
-    console.error('An error occurred while decoding the token:', error);
-    return null;
-  }
-}
+export const isLoggedIn = () => {
+    const sessionId = Cookies.get('sessionId');
+    return !!sessionId; // Returns true if the sessionId cookie is present, false otherwise
+};

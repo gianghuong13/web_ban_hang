@@ -4,6 +4,7 @@ import { compose } from "redux";
 import renderFormGroupField from "../../helpers/renderFormGroupField";
 import renderFormFileInput from "../../helpers/renderFormFileInput";
 import {fetchToken, fetchUserId} from "../Auth";
+import axios from 'axios';
 import {
   required,
   maxLengthMobileNo,
@@ -25,7 +26,7 @@ const handleSubmit = async (event) => {
 
   const mobileNumber = event.target.elements.mobileNumber.value;
   const email = event.target.elements.email.value;
-  const userId = fetchUserId();
+  const userId = fetchToken();
   console.log('userId:', userId);
   
   const response = await fetch('http://localhost:5000/account/profile', {
