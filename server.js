@@ -65,6 +65,52 @@ app.get('/account/user', (req, res) => {
   }
 });
 
+app.put('/account/user', (req, res) => {
+  if (!req.session.username) {
+    // No user is logged in, return an error message
+    res.status(401).json({ valid: false, message: 'Not authenticated' });
+    return;
+  }
+
+  const { email, mobileNumber } = req.body;
+
+  if (!email && !mobileNumber) {
+    // Both fields are empty, do nothing
+    res.status(400).json({ message: 'Both fields are empty' });
+    return;
+  }
+
+  // Find the user
+  const query = 'SELECT * FROM users WHERE username = ?';
+  db.query(query, [req.session.username], (err, results) => {
+    if (err) {
+      console.error('Error finding user:', err);
+      res.status(500).json({ message: 'Error finding user' });
+      return;
+    }
+
+    if (results.length === 0) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // User found, update the fields if they are not empty
+    const user = results[0];
+    const updateQuery = 'UPDATE users SET email = ?, phone = ? WHERE username = ?';
+    const params = [email || user.email, mobileNumber || user.mobileNumber, req.session.username];
+
+    // Update the user
+    db.query(updateQuery, params, (err, result) => {
+      if (err) {
+        console.error('Error updating user:', err);
+        res.status(500).json({ message: 'Error updating user' });
+        return;
+      }
+      res.status(200).json({ message: 'User updated successfully' });
+    });
+  });
+});
+
 app.listen(5000, () => {
   console.log(`Listening @ port ${port}` );
 });

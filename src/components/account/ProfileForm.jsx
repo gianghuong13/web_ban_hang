@@ -18,13 +18,10 @@ import { ReactComponent as IconEnvelop } from "bootstrap-icons/icons/envelope.sv
 import { ReactComponent as IconGeoAlt } from "bootstrap-icons/icons/geo-alt.svg";
 import { ReactComponent as IconCalendarEvent } from "bootstrap-icons/icons/calendar-event.svg";
 
-
-
 const ProfileForm = (props) => {
   const {
     handleSubmit,
     submitting,
-    onSubmit,
     submitFailed,
     onImageChange,
     imagePreview,
@@ -47,12 +44,22 @@ const ProfileForm = (props) => {
       });
   }, []);
 
+  const onSubmit = (values) => {
+    axios.put('http://localhost:5000/account/user', values, { withCredentials: true })
+      .then(response => {
+        console.log('User updated successfully');
+      })
+      .catch(err => {
+        console.error('Error updating user:', err);
+      });
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       className={`needs-validation ${submitFailed ? "was-validated" : ""}`}
       noValidate
     >
