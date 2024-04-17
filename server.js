@@ -19,7 +19,7 @@ const db  = mysql.createPool({
 });
 app.use(cors({
   origin: 'http://localhost:3000', // Allow requests from this origin
-  methods: ["GET", "POST"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true, // Allow cookies
 }));
 
@@ -63,6 +63,56 @@ app.get('/account/user', (req, res) => {
     // No user is logged in, return an error message
     res.status(401).json({ valid: false, message: 'Not authenticated' });
   }
+});
+
+app.put('/account/password', async (req, res) => {
+  if (!req.session.username) {
+    // No user is logged in, return an error message
+    res.status(401).json({ valid: false, message: 'Not authenticated' });
+    return;
+  }
+  console.log(req.body);
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+
+  // Check if new password and confirm password match
+  if (newPassword !== confirmPassword) {
+    res.status(400).json({ message: 'New password and confirm password do not match' });
+    return;
+  }
+
+  // Fetch the user from the database
+  const query = 'SELECT * FROM users WHERE username = ?';
+  db.query(query, [req.session.username], async (err, results) => {
+    if (err) {
+      res.status(500).json({ message: err.toString() });
+      return;
+    }
+
+    if (results.length === 0) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const user = results[0];
+    const isMatch = await bcrypt.compare(currentPassword.toString(), user.password);
+    if (!isMatch) {
+      res.status(400).json({ message: 'Current password is incorrect' });
+      return;
+    }
+
+    // Current password is correct, hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password in the database
+    const updateQuery = 'UPDATE users SET password = ? WHERE username = ?';
+    db.query(updateQuery, [hashedPassword, req.session.username], (err, result) => {
+      if (err) {
+        res.status(500).json({ message: err.toString() });
+        return;
+      }
+      res.status(200).json({ message: 'Password updated successfully' });
+    });
+  });
 });
 
 app.put('/account/user', (req, res) => {
@@ -110,6 +160,17 @@ app.put('/account/user', (req, res) => {
     });
   });
 });
+
+const handleLogout = () => {
+  axios.get('http://localhost:5000/account/signout', { withCredentials: true })
+    .then(() => {
+      setUsername(null);
+      window.location.reload();
+    })
+    .catch(err => {
+      console.error('Error logging out:', err);
+    });
+};
 
 app.listen(5000, () => {
   console.log(`Listening @ port ${port}` );
