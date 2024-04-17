@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Field, reduxForm } from "redux-form";
 import { compose } from "redux";
 import renderFormGroupField from "../../helpers/renderFormGroupField";
 import renderFormFileInput from "../../helpers/renderFormFileInput";
-import {fetchToken, fetchUserId} from "../Auth";
 import axios from 'axios';
 import {
   required,
@@ -20,6 +19,7 @@ import { ReactComponent as IconGeoAlt } from "bootstrap-icons/icons/geo-alt.svg"
 import { ReactComponent as IconCalendarEvent } from "bootstrap-icons/icons/calendar-event.svg";
 
 
+
 const ProfileForm = (props) => {
   const {
     handleSubmit,
@@ -29,6 +29,27 @@ const ProfileForm = (props) => {
     onImageChange,
     imagePreview,
   } = props;
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  useEffect(() => {
+    axios.get('http://localhost:5000/account/user', { withCredentials: true })
+      .then(response => {
+        setIsLoading(false);
+        if (response.data.valid) {
+          setIsLoggedIn(true);
+        } else {
+          window.location.href = '/account/signin';
+        }
+      })
+      .catch(err => {
+        console.error('Error checking login status:', err);
+        window.location.href = '/account/signin';
+      });
+  }, []);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
   return (
     <form
       onSubmit={handleSubmit}

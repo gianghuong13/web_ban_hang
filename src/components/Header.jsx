@@ -1,6 +1,5 @@
 import { lazy } from "react";
 import { Link } from "react-router-dom";
-import { logout } from "./Auth";
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
 

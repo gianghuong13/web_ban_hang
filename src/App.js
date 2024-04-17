@@ -53,10 +53,7 @@ function App() {
               path="/account/forgotpassword"
               element={<ForgotPasswordView/>}
             />
-            <Route exact path="/account/profile" element={
-                                                        <RequireToken>
-                                                          <MyProfileView/>
-                                                        </RequireToken>} />
+            <Route exact path="/account/profile" element={<MyProfileView/>} />
             <Route exact path="/account/orders" element={<OrdersView/>} />
             <Route exact path="/account/wishlist" element={<WishlistView/>} />
             <Route
