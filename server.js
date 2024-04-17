@@ -6,15 +6,8 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const port = process.env.PORT || 5000;
 var jwt = require('jsonwebtoken');
-
-app.use(bodyParser.urlencoded({ extended: false }));
-
-app.use(bodyParser.json());
-app.listen(5000, () => {
-  console.log(`Listening @ port ${port}` );
-});
-
-app.use(cors());
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
 
 const db  = mysql.createPool({
   connectionLimit : 10,
@@ -24,6 +17,11 @@ const db  = mysql.createPool({
   database        : 'ecom',
 
 });
+app.use(cors({
+  origin: 'http://localhost:3000', // Allow requests from this origin
+  methods: ["GET", "POST"],
+  credentials: true, // Allow cookies
+}));
 
 app.use(express.json()); // for parsing application/json
 app.get('/', (req, res) => {
@@ -41,6 +39,34 @@ app.get('/', (req, res) => {
   })
 }); 
 
+
+
+app.use(cookieParser());
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false,
+  expires: 60 * 60 * 24 } // set to true if your using https
+}));
+
+app.get('/account/user', (req, res) => {
+  if (req.session.username) {
+    // User is logged in, return user data
+    res.status(200).json({ valid: true, username: req.session.username});
+  } else {
+    // No user is logged in, return an error message
+    res.status(401).json({ valid: false, message: 'Not authenticated' });
+  }
+});
+
+app.listen(5000, () => {
+  console.log(`Listening @ port ${port}` );
+});
 app.post('/account/signup', async (req, res) => {
   console.log(req.body);
   const {firstName, lastName, username, email, password } = req.body;
@@ -92,22 +118,26 @@ app.post('/account/signin', async (req, res) => {
   db.query(query, [username], async (err, results) => {
     if (err) {
       res.status(500).send(err);
+      return res.json({Login: false});
     } else {
       if (results.length > 0) {
         bcrypt.compare(password.toString(), results[0].password, (err, isMatch) => {
           if (err) {
             res.status(500).json({ message: err.toString() });
+            return res.json({Login: false});
           } else {
             if (isMatch) {
-              const token = jwt.sign({ id: results[0].id }, "jwt-secret-key", {expiresIn: '1d'});
-              res.status(200).json({ message: 'User signed in successfully', Token: token });
+              req.session.username = results[0].username;
+              console.log(req.session.username);
+              return res.json({Login: true, username: req.session.username, message: 'User signed in successfully'});
             } else {
-              res.status(400).json({ message: 'Invalid credentials' });
+              return res.json({Login: false, message: 'Incorrect username or password'});
             }
           }
         });
       } else {
         res.status(400).json({ message: 'User not found' });
+        return res.json({Login: false});
       }
     }
   });

@@ -8,32 +8,23 @@ import {
   maxLength20,
   minLength8,
 } from "../../helpers/validation";
-import { setToken } from "../Auth";
 import { ReactComponent as IconUser } from "bootstrap-icons/icons/person.svg";
 import { ReactComponent as IconShieldLock } from "bootstrap-icons/icons/shield-lock.svg";
 
+import axios from 'axios';
+
 const submitForm = (values) => {
-  // Make POST request
-  fetch('http://localhost:5000/account/signin', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(values),
-  })
-  .then(response => response.json()) // Parse the response as JSON
-  .then(data => {
-    // Handle the response data
-    console.log('Response:', data);
-    if (data.message === 'User signed in successfully') {
-      setToken(data.Token);
-      window.location.href = '/account/profile';
-    }
-  })
-  .catch(error => {
-    // Handle any errors
-    console.error('Error:', error);
-  });
+  axios.post('http://localhost:5000/account/signin', values, { withCredentials: true })
+    .then(response => {
+      console.log('Response:', response.data);
+      if (response.data.message === 'User signed in successfully') {
+        // window.location.href = '/';
+      }
+    })
+    .catch(error => {
+      // Handle any errors
+      console.error('Error:', error);
+    });
 };
 
 const SignInForm = (props) => {
