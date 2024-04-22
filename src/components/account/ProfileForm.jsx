@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Field, reduxForm } from "redux-form";
 import { compose } from "redux";
 import renderFormGroupField from "../../helpers/renderFormGroupField";
 import renderFormFileInput from "../../helpers/renderFormFileInput";
-import {fetchToken, fetchUserId} from "../Auth";
 import axios from 'axios';
 import {
   required,
@@ -19,49 +18,48 @@ import { ReactComponent as IconEnvelop } from "bootstrap-icons/icons/envelope.sv
 import { ReactComponent as IconGeoAlt } from "bootstrap-icons/icons/geo-alt.svg";
 import { ReactComponent as IconCalendarEvent } from "bootstrap-icons/icons/calendar-event.svg";
 
-const handleSubmit = async (event) => {
-  console.log('handleSubmit called');
-
-  event.preventDefault();
-
-  const mobileNumber = event.target.elements.mobileNumber.value;
-  const email = event.target.elements.email.value;
-  const userId = fetchToken();
-  console.log('userId:', userId);
-  
-  const response = await fetch('http://localhost:5000/account/profile', {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${fetchToken()}` // assuming your API uses bearer token authentication
-    },
-    body: JSON.stringify({
-      mobileNumber,
-      email,
-      userId,
-    })
-  });
-
-  if (response.ok) {
-    const data = await response.json();
-    console.log(data.message);
-  } else {
-    console.error(`HTTP error! status: ${response.status}`);
-  }
-}
-
 const ProfileForm = (props) => {
   const {
     handleSubmit,
     submitting,
-    onSubmit,
     submitFailed,
     onImageChange,
     imagePreview,
   } = props;
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  useEffect(() => {
+    axios.get('http://localhost:5000/account/user', { withCredentials: true })
+      .then(response => {
+        setIsLoading(false);
+        if (response.data.valid) {
+          setIsLoggedIn(true);
+        } else {
+          window.location.href = '/account/signin';
+        }
+      })
+      .catch(err => {
+        console.error('Error checking login status:', err);
+        window.location.href = '/account/signin';
+      });
+  }, []);
+
+  const onSubmit = (values) => {
+    axios.put('http://localhost:5000/account/user', values, { withCredentials: true })
+      .then(response => {
+        console.log('User updated successfully');
+      })
+      .catch(err => {
+        console.error('Error updating user:', err);
+      });
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       className={`needs-validation ${submitFailed ? "was-validated" : ""}`}
       noValidate
     >

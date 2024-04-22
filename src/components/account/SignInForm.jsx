@@ -18,7 +18,7 @@ const submitForm = (values) => {
     .then(response => {
       console.log('Response:', response.data);
       if (response.data.message === 'User signed in successfully') {
-        // window.location.href = '/';
+        window.location.href = '/';
       }
     })
     .catch(error => {

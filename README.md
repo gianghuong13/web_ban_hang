@@ -19,10 +19,8 @@ Built with React JS and Bootstrap 5
 - [Copyright and license](#copyright-and-license)
 
 ## Quick start
+Yêu cầu: Với MySQL: Đã cài NodeJS, cho csdl trong file ecome.sql vào xampp với tên database là ecom. Bật apache và mysql lên
 
-
-
-- Install NodeJS
 - Clone the repo: `git clone https://github.com/bhaumikpatel/E-Commerce-Template.git`
 - Install with [npm](https://www.npmjs.com/): `npm install`
 - Runs the app in the development mode `npm start`
