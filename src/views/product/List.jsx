@@ -26,33 +26,24 @@ class ProductListView extends Component {
     view: "list",
   };
 
-  UNSAFE_componentWillMount() {
-    const totalItems = this.getProducts().length;
-    this.setState({ totalItems });
-  }
-
-  onPageChanged = (page) => {
-    let products = this.getProducts();
-    const { currentPage, totalPages, pageLimit } = page;
-    const offset = (currentPage - 1) * pageLimit;
-    const currentProducts = products.slice(offset, offset + pageLimit);
-    this.setState({ currentPage, currentProducts, totalPages });
-  };
-
   onChangeView = (view) => {
     this.setState({ view });
   };
 
-  getProducts = () => {
-    let products = data.products;
-    products = products.concat(products);
-    products = products.concat(products);
-    products = products.concat(products);
-    products = products.concat(products);
-    products = products.concat(products);
-    return products;
-  };
+  componentDidMount() {
+    this.fetchProducts();
+  }
 
+  fetchProducts = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/api/products');
+      const products = await response.json();
+      this.setState({ currentProducts: products });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+ 
   render() {
     return (
       <React.Fragment>
@@ -64,7 +55,7 @@ class ProductListView extends Component {
         >
           <div className="container text-center">
             <span className="display-5 px-3 bg-white rounded shadow">
-              T-Shirts
+              Fashion
             </span>
           </div>
         </div>
