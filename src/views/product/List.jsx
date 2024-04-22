@@ -43,7 +43,7 @@ class ProductListView extends Component {
       console.error(err);
     }
   };
-
+ 
   render() {
     return (
       <React.Fragment>
