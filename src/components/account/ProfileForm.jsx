@@ -48,6 +48,7 @@ const ProfileForm = (props) => {
     axios.put('http://localhost:5000/account/user', values, { withCredentials: true })
       .then(response => {
         console.log('User updated successfully');
+        window.location.reload();
       })
       .catch(err => {
         console.error('Error updating user:', err);

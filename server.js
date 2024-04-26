@@ -14,7 +14,7 @@ const db  = mysql.createPool({
   host            : 'localhost',
   user            : 'root',
   password        : '',
-  database        : 'ecom',
+  database        : 'ecommerce',
 
 });
 app.use(cors({
@@ -196,7 +196,7 @@ app.post('/account/signup', async (req, res) => {
           const hashedPassword = await bcrypt.hash(password.toString(), 10);
 
           // Insert the new user into the database
-          const insertQuery = 'INSERT INTO users (first_name, last_name, username, email, password) VALUES (?, ?, ?, ?, ?)';
+          const insertQuery = 'INSERT INTO users (first_name, last_name, username, email, password, registeredAt) VALUES (?, ?, ?, ?, ?, NOW())';
           db.query(insertQuery, [firstName, lastName, username, email, hashedPassword], (err, result) => {
             if (err) {
               console.log(err);
@@ -236,6 +236,14 @@ app.post('/account/signin', async (req, res) => {
           } else {
             if (isMatch) {
               req.session.username = results[0].username;
+              const updateQuery = 'UPDATE users SET lastLogin = NOW() WHERE username = ?';
+              db.query(updateQuery, [username], (err, result) => {
+                if (err) {
+                  console.log(err);
+                } else {
+                  console.log('Last login updated successfully');
+                }
+              });
               console.log(req.session.username);
               return res.json({Login: true, username: req.session.username, message: 'User signed in successfully'});
             } else {

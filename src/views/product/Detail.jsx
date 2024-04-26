@@ -1,5 +1,9 @@
 import { lazy } from "react";
 import { data } from "../../data";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import axios from 'axios';
+
 const CardFeaturedProduct = lazy(() =>
   import("../../components/card/CardFeaturedProduct")
 );
@@ -17,6 +21,23 @@ const ShippingReturns = lazy(() =>
 const SizeChart = lazy(() => import("../../components/others/SizeChart"));
 
 const ProductDetailView = () => {
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        console.log(`The id is: ${id}`);
+        const response = await axios.get(`http://localhost:3001/api/product/${id}`);
+        setProduct(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
   return (
     <div className="container-fluid mt-3">
       <div className="row">
@@ -24,7 +45,7 @@ const ProductDetailView = () => {
           <div className="row mb-3">
             <div className="col-md-5 text-center">
               <img
-                src="../../images/products/tshirt_red_480x400.webp"
+                src="../../images/products/tshirt_grey_480x400.webp"
                 className="img-fluid mb-3"
                 alt=""
               />
@@ -48,7 +69,7 @@ const ProductDetailView = () => {
               />
             </div>
             <div className="col-md-7">
-              <h1 className="h5 d-inline me-2">Great product name goes here</h1>
+              <h1 className="h5 d-inline me-2">{product.name}</h1>
               <span className="badge bg-success me-2">New</span>
               <span className="badge bg-danger me-2">Hot</span>
               <div className="mb-3">

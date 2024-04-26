@@ -1,21 +1,18 @@
 import React, { lazy, Component } from "react";
-import { data } from "../../data";
-const Paging = lazy(() => import("../../components/Paging"));
-const Breadcrumb = lazy(() => import("../../components/Breadcrumb"));
-const FilterCategory = lazy(() => import("../../components/filter/Category"));
-const FilterPrice = lazy(() => import("../../components/filter/Price"));
-const FilterSize = lazy(() => import("../../components/filter/Size"));
-const FilterStar = lazy(() => import("../../components/filter/Star"));
-const FilterColor = lazy(() => import("../../components/filter/Color"));
-const FilterTag = lazy(() => import("../../components/filter/Tag"));
-const FilterClear = lazy(() => import("../../components/filter/Clear"));
-const CardServices = lazy(() => import("../../components/card/CardServices"));
-const CardProductGrid = lazy(() =>
-  import("../../components/card/CardProductGrid")
-);
-const CardProductList = lazy(() =>
-  import("../../components/card/CardProductList")
-);
+import { Link } from 'react-router-dom';
+import axios from 'axios';
+import Paging from "../../components/Paging";
+import Breadcrumb from "../../components/Breadcrumb";
+import FilterCategory from "../../components/filter/Category";
+import FilterPrice from "../../components/filter/Price";
+import FilterSize from "../../components/filter/Size";
+import FilterStar from "../../components/filter/Star";
+import FilterColor from "../../components/filter/Color";
+import FilterClear from "../../components/filter/Clear";
+import FilterTag from "../../components/filter/Tag";
+import CardServices from "../../components/card/CardServices";
+import CardProductGrid from "../../components/card/CardProductGrid";
+import CardProductList from "../../components/card/CardProductList";
 
 class ProductListView extends Component {
   state = {
@@ -36,8 +33,8 @@ class ProductListView extends Component {
 
   fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/products');
-      const products = await response.json();
+      const response = await axios.get('http://localhost:3001/api/products');
+      const products = response.data;
       this.setState({ currentProducts: products });
     } catch (err) {
       console.error(err);
@@ -45,18 +42,12 @@ class ProductListView extends Component {
   };
  
   render() {
+     console.log(this.state.currentProducts);
     return (
       <React.Fragment>
-        <div
-          className="p-5 bg-primary bs-cover"
-          style={{
-            backgroundImage: "url(../../images/banner/50-Banner.webp)",
-          }}
-        >
+        <div className="p-5 bg-primary bs-cover" style={{backgroundImage: "url(../../images/banner/50-Banner.webp)"}}>
           <div className="container text-center">
-            <span className="display-5 px-3 bg-white rounded shadow">
-              Fashion
-            </span>
+            <span className="display-5 px-3 bg-white rounded shadow">Fashion</span>
           </div>
         </div>
         <Breadcrumb />
@@ -125,18 +116,22 @@ class ProductListView extends Component {
                   this.state.currentProducts.map((product, idx) => {
                     return (
                       <div key={idx} className="col-md-4">
-                        <CardProductGrid data={product} />
+                        <Link to={`/product/${product._id}`}>
+                          <CardProductGrid data={product} />
+                        </Link>
                       </div>
                     );
                   })}
-                {this.state.view === "list" &&
-                  this.state.currentProducts.map((product, idx) => {
-                    return (
-                      <div key={idx} className="col-md-12">
-                        <CardProductList data={product} />
-                      </div>
-                    );
-                  })}
+                  {this.state.view === "list" &&
+                    this.state.currentProducts.map((product, idx) => {
+                      return (
+                        <div key={idx} className="col-md-12">
+                          <Link to={`/product/detail/${product.id}`}> {/* Use product._id instead of id */}
+                            <CardProductList data={product} />
+                          </Link>
+                        </div>
+                      );
+                    })}
               </div>
               <hr />
               <Paging
