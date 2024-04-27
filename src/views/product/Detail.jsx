@@ -69,7 +69,7 @@ const ProductDetailView = () => {
               />
             </div>
             <div className="col-md-7">
-              <h1 className="h5 d-inline me-2">{product.name}</h1>
+            <h1 className="h5 d-inline me-2">{product ? product.name : 'Loading...'}</h1>
               <span className="badge bg-success me-2">New</span>
               <span className="badge bg-danger me-2">Hot</span>
               <div className="mb-3">
