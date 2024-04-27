@@ -45,12 +45,12 @@ const ProductDetailView = () => {
           <div className="row mb-3">
             <div className="col-md-5 text-center">
               <img
-                src="../../images/products/tshirt_grey_480x400.webp"
+                src= {product ? product.img : 'Loading...'}
                 className="img-fluid mb-3"
                 alt=""
               />
               <img
-                src="../../images/products/tshirt_grey_480x400.webp"
+                src="../../images/products/kita.jpg"
                 className="border border-secondary me-2"
                 width="75"
                 alt="..."
@@ -85,8 +85,6 @@ const ProductDetailView = () => {
               <dl className="row small mb-3">
                 <dt className="col-sm-3">Availability</dt>
                 <dd className="col-sm-9">In stock</dd>
-                <dt className="col-sm-3">Sold by</dt>
-                <dd className="col-sm-9">Authorised Store</dd>
                 <dt className="col-sm-3">Size</dt>
                 <dd className="col-sm-9">
                   <div className="form-check form-check-inline">
@@ -209,16 +207,6 @@ const ProductDetailView = () => {
                 >
                   <i className="bi bi-heart-fill"></i>
                 </button>
-              </div>
-              <div>
-                <p className="fw-bold mb-2 small">Product Highlights</p>
-                <ul className="small">
-                  <li>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  </li>
-                  <li>Etiam ullamcorper nibh eget faucibus dictum.</li>
-                  <li>Cras consequat felis ut vulputate porttitor.</li>
-                </ul>
               </div>
             </div>
           </div>
