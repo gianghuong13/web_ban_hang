@@ -160,10 +160,10 @@ const ProductDetailView = () => {
               </dl>
 
               <div className="mb-3">
-                <span className="fw-bold h5 me-2">$1900</span>
-                <del className="small text-muted me-2">$2000</del>
+                <span className="fw-bold h5 me-2">{product ? product.price.price : 'Loading...'}</span>
+                <del className="small text-muted me-2">{product ? product.price.original : 'Loading...'}</del>
                 <span className="rounded p-1 bg-warning  me-2 small">
-                  -$100
+                {product ? -product.price.discount : 'Loading...'}
                 </span>
               </div>
               <div className="mb-3">
