@@ -268,18 +268,6 @@ const ProductDetailView = () => {
                     aria-controls="nav-ship-returns"
                     aria-selected="false"
                   >
-                    Shipping & Returns
-                  </a>
-                  <a
-                    className="nav-link"
-                    id="nav-size-chart-tab"
-                    data-bs-toggle="tab"
-                    href="#nav-size-chart"
-                    role="tab"
-                    aria-controls="nav-size-chart"
-                    aria-selected="false"
-                  >
-                    Size Chart
                   </a>
                 </div>
               </nav>
