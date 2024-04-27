@@ -15,18 +15,18 @@ const CardProductGrid = (props) => {
           Hot
         </span>
       )}
-      {(product.discountPercentage > 0 || product.discountPrice > 0) && (
-        <span
-          className={`rounded position-absolute p-2 bg-warning  ms-2 small ${
-            product.isNew ? "mt-5" : "mt-2"
-          }`}
-        >
-          -
-          {product.discountPercentage > 0
-            ? product.discountPercentage + "%"
-            : "$" + product.discountPrice}
-        </span>
-      )}
+      {(product.price && (product.price.discount > 0 || product.price.discount > 0)) && (
+      <span
+        className={`rounded position-absolute p-2 bg-warning  ms-2 small ${
+          product.isNew ? "mt-5" : "mt-2"
+        }`}
+      >
+        -
+        {product.price.discount > 0
+          ? product.price.discount + "%"
+          : "$" + product.price.discount}
+      </span>
+    )}
       <div className="card-body">
         <h6 className="card-subtitle mb-2">
           <Link to={product.link} className="text-decoration-none">
@@ -34,9 +34,9 @@ const CardProductGrid = (props) => {
           </Link>
         </h6>
         <div className="my-2">
-          <span className="fw-bold h5">${product.price}</span>
-          {product.originPrice > 0 && (
-            <del className="small text-muted ms-2">${product.originPrice}</del>
+          <span className="fw-bold h5">${product.price ? product.price.price : 'Loading...'}</span>
+          {product.price && product.price.original > 0 && (
+            <del className="small text-muted ms-2">${product.price.original}</del>
           )}
           <span className="ms-2">
             {Array.from({ length: product.star }, (_, key) => (

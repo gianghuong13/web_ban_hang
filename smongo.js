@@ -28,17 +28,18 @@ mongoose.connect(url)
       .catch(err => console.error('Error fetching data', err));
 
     // get products
-    mongoose.connection.db.collection('products').find({}, { projection: { _id: 1, name: 1, description: 1, img: 1 } }).toArray()
-      .then(data => {
-        products = data.map(product => ({
-          id: product._id ? product._id.toString() : null, // Check if _id exists before converting to string
-          name: product.name,
-          description: product.description,
-          img: product.img
-        }));
-        console.log(products); // Log the product names, descriptions, and images to the console
-      })
-      .catch(err => console.error('Error fetching products', err));
+    mongoose.connection.db.collection('products').find({}, { projection: { _id: 1, name: 1, description: 1, img: 1, price: 1 } }).toArray()
+    .then(data => {
+      products = data.map(product => ({
+        id: product._id ? product._id.toString() : null, // Check if _id exists before converting to string
+        name: product.name,
+        description: product.description,
+        img: product.img,
+        price: product.price // Add the price field
+      }));
+      console.log(products); // Log the product names, descriptions, images, and prices to the console
+    })
+    .catch(err => console.error('Error fetching products', err));
 
   })
   .catch(err => console.error('Connection error', err));

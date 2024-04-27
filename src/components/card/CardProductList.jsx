@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 
 const CardProductList = (props) => {
   const product = props.data;
+  console.log('From cardproductlist:', product);
   return (
     <div className="card">
       <div className="row g-0">
@@ -54,23 +55,20 @@ const CardProductList = (props) => {
         </div>
         <div className="col-md-3">
           <div className="card-body">
-            <div className="mb-2">
-              <span className="fw-bold h5">${product.price}</span>
-              {product.originPrice > 0 && (
-                <del className="small text-muted ms-2">
-                  ${product.originPrice}
-                </del>
-              )}
-              {(product.discountPercentage > 0 ||
-                product.discountPrice > 0) && (
-                <span className={`rounded p-1 bg-warning ms-2 small`}>
-                  -
-                  {product.discountPercentage > 0
-                    ? product.discountPercentage + "%"
-                    : "$" + product.discountPrice}
-                </span>
-              )}
-            </div>
+          <div className="mb-2">
+            <span className="fw-bold h5">${product.price ? product.price.price : 'Loading...'}</span>
+            {product.price && product.price.original > 0 && (
+              <del className="small text-muted ms-2">${product.price.original}</del>
+            )}
+            {(product.price && (product.price.discount > 0 || product.price.discount > 0)) && (
+              <span className={`rounded p-1 bg-warning ms-2 small`}>
+                -
+                {product.price.discount > 0
+                  ? product.price.discount + "$"
+                  : "$" + product.price.discount}
+              </span>
+            )}
+          </div>
             {product.isFreeShipping && (
               <p className="text-success small mb-2">
                 <i className="bi bi-truck" /> Free shipping
