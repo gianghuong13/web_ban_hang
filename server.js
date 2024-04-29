@@ -346,6 +346,20 @@ app.get('/api/cart/:userId', (req, res) => {
     }
   });
 });
+
+app.get('/api/cartdetails/:userId', (req, res) => {
+  const userId = req.params.userId;
+  const query = 'SELECT * FROM cartdetails WHERE cart_id = ?';
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching user cart:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else {
+      res.status(200).json(results);
+    }
+  });
+});
+
 // Route to create user cart in MySQL
 app.post('/api/cart/:userId/add-item', async (req, res) => {
   const userId = req.params.userId;

@@ -22,6 +22,7 @@ const ProductListView = lazy(() => import("./views/product/List"));
 const ProductDetailView = lazy(() => import("./views/product/Detail"));
 const StarZoneView = lazy(() => import("./views/product/StarZone"));
 const CartView = lazy(() => import("./views/cart/Cart"));
+const CartView2 = lazy(() => import("./views/cart/Cart2"));
 const CheckoutView = lazy(() => import("./views/cart/Checkout"));
 const InvoiceView = lazy(() => import("./views/cart/Invoice"));
 const DocumentationView = lazy(() => import("./views/Documentation"));
@@ -66,6 +67,7 @@ function App() {
             <Route exact path="/product/detail" element={<ProductDetailView/>} />
             <Route exact path="/star/zone" element={<StarZoneView/>} />
             <Route exact path="/cart" element={<CartView/>} />
+            <Route exact path="/cart2" element={<CartView2/>} />
             <Route exact path="/checkout" element={<CheckoutView />} />
             <Route exact path="/invoice" element={<InvoiceView />} />
             <Route exact path="/documentation" element={<DocumentationView/>} />
