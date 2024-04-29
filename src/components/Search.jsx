@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const Search = () => {
   const [products, setProducts] = useState([]);
@@ -57,7 +58,9 @@ const Search = () => {
         </button>
       </div>
       {filteredProducts.map(product => (
-        <div key={product._id}>{product.name}</div>
+        <Link key={product._id} to={`/product/detail/${product.id}`}>
+          <div>{product.name}</div>
+        </Link>
       ))}
     </form>
   );
