@@ -44,7 +44,15 @@ const ProductDetailView = () => {
   
     fetchProduct();
 
-  axios.get('http://localhost:5000/account/user', { withCredentials: true })
+
+}, [id]);
+
+useEffect(() => {
+  console.log(`le user id is ${userId}`);
+}, [userId]);
+
+  const addToCart = async () => {
+    axios.get('http://localhost:5000/account/user', { withCredentials: true })
     .then(response => {
       if (response.data.valid) {
         setIsLoggedIn(true);
@@ -58,17 +66,6 @@ const ProductDetailView = () => {
       console.error('Error checking login status:', err);
       window.location.href = '/account/signin';
     });
-}, [id]);
-
-useEffect(() => {
-  console.log(`le user id is ${userId}`);
-}, [userId]);
-
-  const addToCart = async () => {
-    if (!isLoggedIn) {
-      window.location.href = '/account/signin';
-      return;
-    }
     console.log('Adding product to cart:', product);
     const quantity = 1;
 
