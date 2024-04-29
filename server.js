@@ -9,6 +9,7 @@ var jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const mongoose = require('mongoose');
+const { ProductModel } = require('./Product');
 
 const mongoUrl = 'mongodb+srv://commercial:05timE2NuctQg0Yy@cluster0.wfto06b.mongodb.net/things?retryWrites=true&w=majority&appName=Cluster0';
 
@@ -20,6 +21,7 @@ const db  = mysql.createPool({
   database        : 'ecommerce',
 
 });
+
 app.use(cors({
   origin: 'http://localhost:3000', // Allow requests from this origin
   methods: ["GET", "POST", "PUT", "DELETE"],
@@ -356,9 +358,9 @@ app.post('/api/cart/:userId/add-item', async (req, res) => {
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
-
+    const price = product.price.price;
     // Check if the cart already exists for the user
-    const checkQuery = 'SELECT * FROM cart WHERE cart_id = ?';
+    const checkQuery = 'SELECT * FROM carts WHERE cart_id = ?';
     db.query(checkQuery, [userId], async (err, results) => {
       if (err) {
         console.error('Error checking user cart:', err);
@@ -377,7 +379,7 @@ app.post('/api/cart/:userId/add-item', async (req, res) => {
           if (productResults.length > 0) {
             // Product is already in the cart, update the quantity
             const updateQuery = 'UPDATE cartdetails SET quantity = quantity + ?, priceEach = ? WHERE cart_id = ? AND product_id = ?';
-            db.query(updateQuery, [quantity, product.price, userId, productId], (err, result) => {
+            db.query(updateQuery, [quantity, price, userId, productId], (err, result) => {
               if (err) {
                 console.error('Error updating cart:', err);
                 return res.status(500).json({ error: 'Error updating cart' });
@@ -387,7 +389,7 @@ app.post('/api/cart/:userId/add-item', async (req, res) => {
           } else {
             // Product is not in the cart, add it
             const insertQuery = 'INSERT INTO cartdetails (cart_id, product_id, quantity, priceEach) VALUES (?, ?, ?, ?)';
-            db.query(insertQuery, [userId, productId, quantity, product.price], (err, result) => {
+            db.query(insertQuery, [userId, productId, quantity, price], (err, result) => {
               if (err) {
                 console.error('Error adding product to cart:', err);
                 return res.status(500).json({ error: 'Error adding product to cart' });
@@ -398,7 +400,7 @@ app.post('/api/cart/:userId/add-item', async (req, res) => {
         });
       } else {
         // Cart doesn't exist, create a new one
-        const insertCartQuery = 'INSERT INTO cart (cart_id, user_id, createdAt, status) VALUES (?, ?, NOW(), ?)';
+        const insertCartQuery = 'INSERT INTO carts (cart_id, user_id, createdAt, status) VALUES (?, ?, NOW(), ?)';
         db.query(insertCartQuery, [userId, userId, 'active'], (err, result) => {
           if (err) {
             console.error('Error creating cart:', err);
@@ -407,7 +409,7 @@ app.post('/api/cart/:userId/add-item', async (req, res) => {
 
           // Add the product to the cart
           const insertProductQuery = 'INSERT INTO cartdetails (cart_id, product_id, quantity, priceEach) VALUES (?, ?, ?, ?)';
-          db.query(insertProductQuery, [userId, productId, quantity, product.price], (err, result) => {
+          db.query(insertProductQuery, [userId, productId, quantity, price], (err, result) => {
             if (err) {
               console.error('Error adding product to cart:', err);
               return res.status(500).json({ error: 'Error adding product to cart' });

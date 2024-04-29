@@ -26,45 +26,54 @@ const ProductDetailView = () => {
   const [cart, setCart] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [productId, setProductId] = useState(null); 
+
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(`http://localhost:3001/api/product/${id}`);
+        console.log('Product:', response.data);
         setProduct(response.data);
+        setProductId(response.data._id);
+        console.log('Product ID:', response.data._id);
       } catch (error) {
         console.error(error);
       }
     };
-
+  
     fetchProduct();
 
-    axios.get('http://localhost:5000/account/user', { withCredentials: true })
-      .then(response => {
-        if (response.data.valid) {
-          setIsLoggedIn(true);
-          setUserId(response.data.userId);
-        } else {
-          window.location.href = '/account/signin';
-        }
-      })
-      .catch(err => {
-        console.error('Error checking login status:', err);
+  axios.get('http://localhost:5000/account/user', { withCredentials: true })
+    .then(response => {
+      if (response.data.valid) {
+        setIsLoggedIn(true);
+        console.log(`le response data is: ${JSON.stringify(response.data)}`);
+        setUserId(response.data.user_id);
+      } else {
         window.location.href = '/account/signin';
-      });
-  }, [id]);
+      }
+    })
+    .catch(err => {
+      console.error('Error checking login status:', err);
+      window.location.href = '/account/signin';
+    });
+}, [id]);
+
+useEffect(() => {
+  console.log(`le user id is ${userId}`);
+}, [userId]);
 
   const addToCart = async () => {
     if (!isLoggedIn) {
       window.location.href = '/account/signin';
       return;
     }
-
-    const productId = product.id;
+    console.log('Adding product to cart:', product);
     const quantity = 1;
 
     try {
-      const response = await axios.post(`/api/cart/${userId}/add-item`, { productId, quantity });
+      const response = await axios.post(`http://localhost:5000/api/cart/${userId}/add-item`, { productId, quantity });
 
       if (response.status === 200) {
         console.log('Cart updated successfully');
