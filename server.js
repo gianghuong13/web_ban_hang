@@ -8,6 +8,9 @@ const port = process.env.PORT || 5000;
 var jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
+const mongoose = require('mongoose');
+
+const mongoUrl = 'mongodb+srv://commercial:05timE2NuctQg0Yy@cluster0.wfto06b.mongodb.net/things?retryWrites=true&w=majority&appName=Cluster0';
 
 const db  = mysql.createPool({
   connectionLimit : 10,
@@ -58,7 +61,7 @@ app.use(session({
 app.get('/account/user', (req, res) => {
   if (req.session.username) {
     // User is logged in, return user data
-    res.status(200).json({ valid: true, username: req.session.username});
+    res.status(200).json({ valid: true, username: req.session.username, user_id: req.session.user_id});
   } else {
     // No user is logged in, return an error message
     res.status(401).json({ valid: false, message: 'Not authenticated' });
@@ -225,17 +228,16 @@ app.post('/account/signin', async (req, res) => {
   const query = 'SELECT * FROM users WHERE username = ?';
   db.query(query, [username], async (err, results) => {
     if (err) {
-      res.status(500).send(err);
-      return res.json({Login: false});
+      return res.status(500).json({Login: false, message: err.toString()});
     } else {
       if (results.length > 0) {
         bcrypt.compare(password.toString(), results[0].password, (err, isMatch) => {
           if (err) {
-            res.status(500).json({ message: err.toString() });
-            return res.json({Login: false});
+            return res.status(500).json({Login: false, message: err.toString()});
           } else {
             if (isMatch) {
               req.session.username = results[0].username;
+              req.session.user_id = results[0].user_id;
               const updateQuery = 'UPDATE users SET lastLogin = NOW() WHERE username = ?';
               db.query(updateQuery, [username], (err, result) => {
                 if (err) {
@@ -245,15 +247,15 @@ app.post('/account/signin', async (req, res) => {
                 }
               });
               console.log(req.session.username);
-              return res.json({Login: true, username: req.session.username, message: 'User signed in successfully'});
+              return res.json({Login: true, username: req.session.username, user_id: results[0].user_id, message: 'User signed in successfully'});
             } else {
+              console.log(req.session.username);
               return res.json({Login: false, message: 'Incorrect username or password'});
             }
           }
         });
       } else {
-        res.status(400).json({ message: 'User not found' });
-        return res.json({Login: false});
+        return res.status(400).json({Login: false, message: 'User not found'});
       }
     }
   });
@@ -283,6 +285,170 @@ app.put('/account/profile', async (req, res) => {
       res.status(500).json({ message: err.toString() });
     } else {
       res.status(200).json({ message: 'User data updated successfully' });
+    }
+  });
+});
+
+app.get('/api/categories', (req, res) => {
+  res.json(categories);
+});
+
+app.get('/api/products', (req, res) => {
+  res.json(products);
+});
+
+mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('Error connecting to MongoDB:', err));
+
+// Route to get categories from MongoDB
+app.get('/api/categories', (req, res) => {
+  // Implement logic to fetch categories from MongoDB
+});
+
+// Route to get products from MongoDB
+app.get('/api/products', (req, res) => {
+  // Implement logic to fetch products from MongoDB
+});
+
+// Route to get a single product from MongoDB
+app.get('/api/product/:id', async (req, res) => {
+  // Implement logic to fetch a single product from MongoDB
+});
+
+// Route to create a product in MongoDB
+app.post('/api/product', async (req, res) => {
+  // Implement logic to create a product in MongoDB
+});
+
+// Route to update a product in MongoDB
+app.put('/api/product/:id', async (req, res) => {
+  // Implement logic to update a product in MongoDB
+});
+
+// Route to delete a product from MongoDB
+app.delete('/api/product/:id', async (req, res) => {
+  // Implement logic to delete a product from MongoDB
+});
+
+// Route to get user cart from MySQL
+app.get('/api/cart/:userId', (req, res) => {
+  const userId = req.params.userId;
+  const query = 'SELECT * FROM carts WHERE cart_id = ?';
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching user cart:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else {
+      res.status(200).json(results);
+    }
+  });
+});
+// Route to create user cart in MySQL
+app.post('/api/cart/:userId/add-item', async (req, res) => {
+  const userId = req.params.userId;
+  const { productId, quantity } = req.body;
+
+  try {
+    // Retrieve product details from MongoDB
+    const product = await ProductModel.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    // Check if the cart already exists for the user
+    const checkQuery = 'SELECT * FROM cart WHERE cart_id = ?';
+    db.query(checkQuery, [userId], async (err, results) => {
+      if (err) {
+        console.error('Error checking user cart:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+
+      if (results.length > 0) {
+        // Cart exists, check if the product is already in the cart
+        const checkProductQuery = 'SELECT * FROM cartdetails WHERE cart_id = ? AND product_id = ?';
+        db.query(checkProductQuery, [userId, productId], (err, productResults) => {
+          if (err) {
+            console.error('Error checking product in cart:', err);
+            return res.status(500).json({ error: 'Error checking product in cart' });
+          }
+
+          if (productResults.length > 0) {
+            // Product is already in the cart, update the quantity
+            const updateQuery = 'UPDATE cartdetails SET quantity = quantity + ?, priceEach = ? WHERE cart_id = ? AND product_id = ?';
+            db.query(updateQuery, [quantity, product.price, userId, productId], (err, result) => {
+              if (err) {
+                console.error('Error updating cart:', err);
+                return res.status(500).json({ error: 'Error updating cart' });
+              }
+              res.status(200).json({ message: 'Cart updated successfully' });
+            });
+          } else {
+            // Product is not in the cart, add it
+            const insertQuery = 'INSERT INTO cartdetails (cart_id, product_id, quantity, priceEach) VALUES (?, ?, ?, ?)';
+            db.query(insertQuery, [userId, productId, quantity, product.price], (err, result) => {
+              if (err) {
+                console.error('Error adding product to cart:', err);
+                return res.status(500).json({ error: 'Error adding product to cart' });
+              }
+              res.status(201).json({ message: 'Product added to cart successfully' });
+            });
+          }
+        });
+      } else {
+        // Cart doesn't exist, create a new one
+        const insertCartQuery = 'INSERT INTO cart (cart_id, user_id, createdAt, status) VALUES (?, ?, NOW(), ?)';
+        db.query(insertCartQuery, [userId, userId, 'active'], (err, result) => {
+          if (err) {
+            console.error('Error creating cart:', err);
+            return res.status(500).json({ error: 'Error creating cart' });
+          }
+
+          // Add the product to the cart
+          const insertProductQuery = 'INSERT INTO cartdetails (cart_id, product_id, quantity, priceEach) VALUES (?, ?, ?, ?)';
+          db.query(insertProductQuery, [userId, productId, quantity, product.price], (err, result) => {
+            if (err) {
+              console.error('Error adding product to cart:', err);
+              return res.status(500).json({ error: 'Error adding product to cart' });
+            }
+            res.status(201).json({ message: 'Cart created and product added successfully' });
+          });
+        });
+      }
+    });
+  } catch (error) {
+    console.error('Error retrieving product details:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+// Route to update user cart in MySQL
+app.put('/api/cart/:userId/update-item/:itemId', (req, res) => {
+  const userId = req.params.userId;
+  const itemId = req.params.itemId;
+  const { quantity } = req.body;
+  const updateQuery = 'UPDATE carts SET quantity = ? WHERE cart_id = ? AND product_id = ?';
+  db.query(updateQuery, [quantity, userId, itemId], (err, result) => {
+    if (err) {
+      console.error('Error updating item quantity in user cart:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else {
+      res.status(200).json({ message: 'Item quantity updated in user cart successfully' });
+    }
+  });
+});
+
+// Route to delete user cart from MySQL
+app.delete('/api/cart/:userId/remove-item/:itemId', (req, res) => {
+  const userId = req.params.userId;
+  const itemId = req.params.itemId;
+  const deleteQuery = 'DELETE FROM carts WHERE cart_id = ? AND product_id = ?';
+  db.query(deleteQuery, [userId, itemId], (err, result) => {
+    if (err) {
+      console.error('Error deleting item from user cart:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else {
+      res.status(200).json({ message: 'Item removed from user cart successfully' });
     }
   });
 });
