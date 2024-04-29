@@ -4,12 +4,14 @@ const bodyParser = require('body-parser');
 const mongoose = require("mongoose");
 const { ProductModel, transformProductData } = require('./Product');
 
+
 const app = express();
 app.use(cors()); // This will enable CORS
 app.use(bodyParser.json());
 const port = 3001;
 // MongoDB Atlas connection string
 const url = 'mongodb+srv://commercial:05timE2NuctQg0Yy@cluster0.wfto06b.mongodb.net/things?retryWrites=true&w=majority&appName=Cluster0';
+
 let categories = [];
 let products = [];
 

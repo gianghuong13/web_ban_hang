@@ -23,11 +23,13 @@ const SizeChart = lazy(() => import("../../components/others/SizeChart"));
 const ProductDetailView = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [cart, setCart] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        console.log(`The id is: ${id}`);
         const response = await axios.get(`http://localhost:3001/api/product/${id}`);
         setProduct(response.data);
       } catch (error) {
@@ -36,7 +38,43 @@ const ProductDetailView = () => {
     };
 
     fetchProduct();
+
+    axios.get('http://localhost:5000/account/user', { withCredentials: true })
+      .then(response => {
+        if (response.data.valid) {
+          setIsLoggedIn(true);
+          setUserId(response.data.userId);
+        } else {
+          window.location.href = '/account/signin';
+        }
+      })
+      .catch(err => {
+        console.error('Error checking login status:', err);
+        window.location.href = '/account/signin';
+      });
   }, [id]);
+
+  const addToCart = async () => {
+    if (!isLoggedIn) {
+      window.location.href = '/account/signin';
+      return;
+    }
+
+    const productId = product.id;
+    const quantity = 1;
+
+    try {
+      const response = await axios.post(`/api/cart/${userId}/add-item`, { productId, quantity });
+
+      if (response.status === 200) {
+        console.log('Cart updated successfully');
+      } else if (response.status === 201) {
+        console.log('Product added to cart successfully');
+      }
+    } catch (error) {
+      console.error('Error adding product to cart:', error);
+    }
+  };
 
   return (
     <div className="container-fluid mt-3">
@@ -190,6 +228,7 @@ const ProductDetailView = () => {
                   type="button"
                   className="btn btn-sm btn-primary me-2"
                   title="Add to cart"
+                  onClick={addToCart}
                 >
                   <i className="bi bi-cart-plus me-1"></i>Add to cart
                 </button>

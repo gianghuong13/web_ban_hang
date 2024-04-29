@@ -13,6 +13,7 @@ import { ReactComponent as IconEmail } from "bootstrap-icons/icons/envelope-open
 import { ReactComponent as IconShieldLock } from "bootstrap-icons/icons/shield-lock.svg";
 
 const submitForm = (values) => {
+  console.log("button pressed")
   // Make POST request
   fetch('http://localhost:5000/account/signup', {
     method: 'POST',
@@ -115,7 +116,7 @@ const SignUpForm = (props) => {
         </button>
       </div>
       <Link className="float-start" to="/account/signin" title="Sign In">
-        Sing In
+        Sign In
       </Link>
       <Link
         className="float-end"

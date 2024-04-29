@@ -26,23 +26,23 @@ const ProfileForm = (props) => {
     onImageChange,
     imagePreview,
   } = props;
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  useEffect(() => {
-    axios.get('http://localhost:5000/account/user', { withCredentials: true })
-      .then(response => {
-        setIsLoading(false);
-        if (response.data.valid) {
-          setIsLoggedIn(true);
-        } else {
+    const [isLoading, setIsLoading] = useState(true);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    useEffect(() => {
+      axios.get('http://localhost:5000/account/user', { withCredentials: true })
+        .then(response => {
+          setIsLoading(false);
+          if (response.data.valid) {
+            setIsLoggedIn(true);
+          } else {
+            window.location.href = '/account/signin';
+          }
+        })
+        .catch(err => {
+          console.error('Error checking login status:', err);
           window.location.href = '/account/signin';
-        }
-      })
-      .catch(err => {
-        console.error('Error checking login status:', err);
-        window.location.href = '/account/signin';
-      });
-  }, []);
+        });
+    }, []);
 
   const onSubmit = (values) => {
     axios.put('http://localhost:5000/account/user', values, { withCredentials: true })
