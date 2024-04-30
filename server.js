@@ -457,6 +457,19 @@ app.put('/api/cart/:userId/update-item/:itemId', (req, res) => {
   });
 });
 
+app.get('/api/user_cart/:userId', (req, res) => {
+  const userId = req.params.userId;
+  const query = `SELECT * FROM user_cart_view WHERE user_id = ?`;
+  db.query(query, [userId], (error, results, fields) => {
+    if (error) {
+      console.error('Error fetching user cart data:', error);
+      res.status(500).json({ error: 'Error fetching user cart data' });
+    } else {
+      res.json(results);
+    }
+  });
+});
+
 // Route to delete user cart from MySQL
 app.delete('/api/cart/:userId/remove-item/:itemId', (req, res) => {
   const userId = req.params.userId;

@@ -19,32 +19,26 @@ const CartView = () => {
         setIsLoading(false);
         if (response.data.valid) {
           setIsLoggedIn(true);
-          console.log(`response.data in cart is: ${JSON.stringify(response.data)}`)
           const userId = response.data.user_id;
-          axios.get(`http://localhost:5000/api/cart/${userId}`)
+  
+          axios.get(`http://localhost:5000/api/user_cart/${userId}`)
             .then(response => {
-              console.log(`response.data2 in cart is: ${JSON.stringify(response.data)}`)
-              const cartId = response.data[0].cart_id;
-              console.log(`cartId in cart is: ${cartId}`)
-              axios.get(`http://localhost:5000/api/cartdetails/${cartId}`)
-                .then(response => {
-                  console.log(`cartDetails in cart is: ${JSON.stringify(response.data)}`);
-                  setCartData(response.data);
-                  // Fetch details for each product in the cart
-                  response.data.forEach(item => {
-                    axios.get(`http://localhost:3001/api/product/${item.product_id}`)
-                      .then(response => {
-                        setProductDetails(prevDetails => [...prevDetails, response.data]);
-                        console.log(`productDetails in cart is: ${JSON.stringify(productDetails)}`)
-                      })
-                      .catch(error => {
-                        console.error('Error fetching product details:', error);
-                      });
+              console.log(`response.data in cart is: ${JSON.stringify(response.data)}`);
+              setCartData(response.data);
+  
+              // Fetch details for each product in the cart
+              response.data.forEach(item => {
+                console.log(`item.product_id in cart is: ${item.product_id}`);
+                axios.get(`http://localhost:3001/api/product/${item.product_id}`)
+                  .then(productResponse => {
+                    // Update productDetails state here
+                    setProductDetails(prevProductDetails => [...prevProductDetails, productResponse.data]);
+                    console.log(`productResponse.data in cart is: ${JSON.stringify(productResponse.data)}`);
+                  })
+                  .catch(error => {
+                    console.error('Error fetching product details:', error);
                   });
-                })
-                .catch(err => {
-                  console.error('Error fetching cart details:', err);
-                });
+              });
             })
             .catch(err => {
               console.error('Error fetching cart data:', err);
@@ -91,48 +85,52 @@ const CartView = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {cartData.map((item, index) => (
-                          <tr key={index}>
-                            <td>
-                              <div className="row">
-                                <div className="col-3 d-none d-md-block">
-                                  <img src={item.image} width="80" alt="..." />
+                        {cartData.map((item, index) => {
+                          // Find the product details for this item
+                          const product = productDetails.find(product => product.product_id === item.product_id);
+                          return (
+                            <tr key={index}>
+                              <td>
+                                <div className="row">
+                                  <div className="col-3 d-none d-md-block">
+                                    <img src={product ? product.image : ''} width="80" alt="..." />
+                                  </div>
+                                  <div className="col">
+                                    <Link to={`/product/detail/${item.productId}`} className="text-decoration-none">
+                                      {product ? product.name : ''}
+                                    </Link>
+                                    <p className="small text-muted">
+                                      Size: {item.size}, Color: {item.color}, Brand: {item.brand}
+                                    </p>
+                                  </div>
                                 </div>
-                                <div className="col">
-                                  <Link to={`/product/detail/${item.productId}`} className="text-decoration-none">
-                                    {item.name}
-                                  </Link>
-                                  <p className="small text-muted">
-                                    Size: {item.size}, Color: {item.color}, Brand: {item.brand}
-                                  </p>
+                              </td>
+                              <td>
+                                <div className="input-group input-group-sm mw-140">
+                                  <button className="btn btn-primary text-white" type="button">
+                                    <i className="bi bi-dash-lg"></i>
+                                  </button>
+                                  <input type="text" className="form-control" defaultValue={item.quantity} />
+                                  <button className="btn btn-primary text-white" type="button">
+                                    <i className="bi bi-plus-lg"></i>
+                                  </button>
                                 </div>
-                              </div>
-                            </td>
-                            <td>
-                              <div className="input-group input-group-sm mw-140">
-                                <button className="btn btn-primary text-white" type="button">
-                                  <i className="bi bi-dash-lg"></i>
+                              </td>
+                              <td>
+                                <var className="price">{item.price}</var>
+                                <small className="d-block text-muted">${item.priceEach}</small>
+                              </td>
+                              <td className="text-end">
+                                <button className="btn btn-sm btn-outline-secondary me-2">
+                                  <i className="bi bi-heart-fill"></i>
                                 </button>
-                                <input type="text" className="form-control" defaultValue={item.quantity} />
-                                <button className="btn btn-primary text-white" type="button">
-                                  <i className="bi bi-plus-lg"></i>
+                                <button className="btn btn-sm btn-outline-danger">
+                                  <i className="bi bi-trash"></i>
                                 </button>
-                              </div>
-                            </td>
-                            <td>
-                              <var className="price">{item.price}</var>
-                              <small className="d-block text-muted">${item.priceEach}</small>
-                            </td>
-                            <td className="text-end">
-                              <button className="btn btn-sm btn-outline-secondary me-2">
-                                <i className="bi bi-heart-fill"></i>
-                              </button>
-                              <button className="btn btn-sm btn-outline-danger">
-                                <i className="bi bi-trash"></i>
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -162,7 +160,6 @@ const CartView = () => {
                     <dl className="row border-bottom">
                       <dt className="col-6">Total price:</dt>
                       <dd className="col-6 text-end">$1,568</dd>
-
                       <dt className="col-6 text-success">Discount:</dt>
                       <dd className="col-6 text-success text-end">-$58</dd>
                       <dt className="col-6 text-success">
@@ -195,5 +192,4 @@ const CartView = () => {
     </div>
   );
 };
-
 export default CartView;
