@@ -51,36 +51,38 @@ useEffect(() => {
   console.log(`le user id is ${userId}`);
 }, [userId]);
 
-  const addToCart = async () => {
-    axios.get('http://localhost:5000/account/user', { withCredentials: true })
-    .then(response => {
-      if (response.data.valid) {
-        setIsLoggedIn(true);
-        console.log(`le response data is: ${JSON.stringify(response.data)}`);
-        setUserId(response.data.user_id);
-      } else {
-        window.location.href = '/account/signin';
-      }
-    })
-    .catch(err => {
-      console.error('Error checking login status:', err);
+const addToCart = () => {
+  axios.get('http://localhost:5000/account/user', { withCredentials: true })
+  .then(response => {
+    if (response.data.valid) {
+      setIsLoggedIn(true);
+      console.log(`le response data is: ${JSON.stringify(response.data)}`);
+      setUserId(response.data.user_id);
+
+      console.log('Adding product to cart:', product);
+      const quantity = 1;
+
+      axios.post(`http://localhost:5000/api/cart/${response.data.user_id}/add-item`, { productId, quantity })
+      .then(response => {
+        if (response.status === 200) {
+          console.log('Cart updated successfully');
+        } else if (response.status === 201) {
+          console.log('Product added to cart successfully');
+        }
+      })
+      .catch(error => {
+        console.error('Error adding product to cart:', error);
+      });
+
+    } else {
       window.location.href = '/account/signin';
-    });
-    console.log('Adding product to cart:', product);
-    const quantity = 1;
-
-    try {
-      const response = await axios.post(`http://localhost:5000/api/cart/${userId}/add-item`, { productId, quantity });
-
-      if (response.status === 200) {
-        console.log('Cart updated successfully');
-      } else if (response.status === 201) {
-        console.log('Product added to cart successfully');
-      }
-    } catch (error) {
-      console.error('Error adding product to cart:', error);
     }
-  };
+  })
+  .catch(err => {
+    console.error('Error checking login status:', err);
+    window.location.href = '/account/signin';
+  });
+};
 
   return (
     <div className="container-fluid mt-3">
