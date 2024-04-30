@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 30, 2024 at 11:22 AM
+-- Generation Time: Apr 30, 2024 at 05:32 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -58,6 +58,7 @@ CREATE TABLE `address` (
 --
 
 CREATE TABLE `cartdetails` (
+  `cartdetails_id` int(11) NOT NULL,
   `cart_id` int(11) NOT NULL,
   `product_id` varchar(64) NOT NULL,
   `priceEach` float NOT NULL,
@@ -68,10 +69,10 @@ CREATE TABLE `cartdetails` (
 -- Dumping data for table `cartdetails`
 --
 
-INSERT INTO `cartdetails` (`cart_id`, `product_id`, `priceEach`, `quantity`) VALUES
-(1, 'products_id_1', 40, 2),
-(1, 'products_id_2', 50, 2),
-(1, 'products_id_3', 50, 1);
+INSERT INTO `cartdetails` (`cartdetails_id`, `cart_id`, `product_id`, `priceEach`, `quantity`) VALUES
+(1, 1, 'products_id_1', 40, 1),
+(2, 1, 'products_id_2', 50, 2),
+(3, 1, 'products_id_3', 50, 3);
 
 -- --------------------------------------------------------
 
@@ -91,7 +92,7 @@ CREATE TABLE `carts` (
 --
 
 INSERT INTO `carts` (`cart_id`, `user_id`, `createdAt`, `status`) VALUES
-(1, 1, '2024-04-29 23:31:30', 0);
+(1, 1, '2024-04-30 22:31:49', 0);
 
 -- --------------------------------------------------------
 
@@ -159,7 +160,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `first_name`, `last_name`, `username`, `email`, `phone`, `password`, `admin`, `registeredAt`, `lastLogin`) VALUES
-(1, 'Le', 'Cong Hoang', 'cusnaruto', '22026555@gmail.com', '0727277727', '$2b$10$qhFEJvQ33CkvymciWjxL8.ptktyhn9TIlMM.4Qd1iK337DeGOwoRK', 0, '2024-04-21 21:41:46', '2024-04-30 16:21:30'),
+(1, 'Le', 'Cong Hoang', 'cusnaruto', '22026555@gmail.com', '0727277727', '$2b$10$qhFEJvQ33CkvymciWjxL8.ptktyhn9TIlMM.4Qd1iK337DeGOwoRK', 0, '2024-04-21 21:41:46', '2024-04-30 22:31:41'),
 (2, 'Hoang', 'Cong', 'hoang', 'nibix39919@dxice.com', NULL, '$2b$10$40L5mWX.hA6giwhiYWiGMuCTTQEEDmnWDR.T0Nl.B9Aeo/J4dB5He', 0, '2024-04-29 19:56:37', NULL),
 (3, NULL, NULL, 'thangman', 'hohoho@gmail.com', NULL, '$2b$10$IZ0jJDoeo9JVWZUEqPtC3.TtDSpAVf02sC0/QlxwOkn/qTS9QV5TW', 0, '2024-04-29 20:10:37', '2024-04-29 20:18:35'),
 (4, 'Rob', 'Bank', 'thang', 'ngotband@gmial.com', NULL, '$2b$10$dpLEbXeloum84PLEbsyyXuDEyC1nfzvHGat9LgZSFTas7vUY9wLz2', 0, '2024-04-29 20:11:30', '2024-04-29 20:31:40'),
@@ -260,7 +261,7 @@ ALTER TABLE `address`
 -- Indexes for table `cartdetails`
 --
 ALTER TABLE `cartdetails`
-  ADD PRIMARY KEY (`product_id`);
+  ADD PRIMARY KEY (`cartdetails_id`);
 
 --
 -- Indexes for table `carts`
@@ -306,6 +307,12 @@ ALTER TABLE `address`
   MODIFY `address_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `cartdetails`
+--
+ALTER TABLE `cartdetails`
+  MODIFY `cartdetails_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
@@ -320,12 +327,6 @@ ALTER TABLE `users`
 --
 ALTER TABLE `address`
   ADD CONSTRAINT `fk_addresses_users_user_id ` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `cartdetails`
---
-ALTER TABLE `cartdetails`
-  ADD CONSTRAINT `fk_cart_cartdetails_cartid` FOREIGN KEY (`cart_id`) REFERENCES `carts` (`cart_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `carts`

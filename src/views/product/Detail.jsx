@@ -242,13 +242,6 @@ const addToCart = () => {
                 </button>
                 <button
                   type="button"
-                  className="btn btn-sm btn-warning me-2"
-                  title="Buy now"
-                >
-                  <i className="bi bi-cart3 me-1"></i>Buy now
-                </button>
-                <button
-                  type="button"
                   className="btn btn-sm btn-outline-secondary"
                   title="Add to wishlist"
                 >
