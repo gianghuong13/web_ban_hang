@@ -362,7 +362,10 @@ app.get('/api/cartdetails/:userId', (req, res) => {
 
 // Route to create user cart in MySQL
 app.post('/api/cart/:userId/add-item', async (req, res) => {
+  console.log(req.body);
+  console.log(req.params);
   const userId = req.params.userId;
+  console.log(`req.params.userId is: ${req.params.userId}`);
   const { productId, quantity } = req.body;
 
   try {
