@@ -11,6 +11,7 @@ const CartView = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartData, setCartData] = useState([]);
   const [productDetails, setProductDetails] = useState([]);
+  const [totalAmount, setTotalAmount] = useState(0);
 
 
   useEffect(() => {
@@ -49,6 +50,16 @@ const CartView = () => {
             .catch(err => {
               console.error('Error fetching cart data:', err);
             });
+  
+          // Fetch total amount
+          axios.get(`http://localhost:5000/cart/total/${userId}`)
+            .then(response => {
+              console.log(`response.data.totalAmount in cart is: ${response.data.totalAmount}`);
+              setTotalAmount(response.data.totalAmount);
+            })
+            .catch(error => {
+              console.error('Error fetching cart total:', error);
+            });
         } else {
           window.location.href = '/account/signin';
         }
@@ -58,7 +69,6 @@ const CartView = () => {
         window.location.href = '/account/signin';
       });
   }, []);
-
   const onSubmitApplyCouponCode = async (values) => {
     alert(JSON.stringify(values));
   };
@@ -163,18 +173,18 @@ const CartView = () => {
                   <div className="card-body">
                     <dl className="row border-bottom">
                       <dt className="col-6">Total price:</dt>
-                      <dd className="col-6 text-end">$1,568</dd>
+                      <dd className="col-6 text-end"><strong>${totalAmount}</strong></dd>
                       <dt className="col-6 text-success">Discount:</dt>
-                      <dd className="col-6 text-success text-end">-$58</dd>
+                      <dd className="col-6 text-success text-end">-$0</dd>
                       <dt className="col-6 text-success">
                         Coupon: <span className="small text-muted">EXAMPLECODE</span>{" "}
                       </dt>
-                      <dd className="col-6 text-success text-end">-$68</dd>
+                      <dd className="col-6 text-success text-end">-$0</dd>
                     </dl>
                     <dl className="row">
                       <dt className="col-6">Total:</dt>
                       <dd className="col-6 text-end  h5">
-                        <strong>$1,350</strong>
+                        <strong>${totalAmount}</strong>
                       </dd>
                     </dl>
                     <hr />

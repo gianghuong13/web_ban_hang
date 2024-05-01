@@ -484,3 +484,20 @@ app.delete('/api/cart/:userId/remove-item/:itemId', (req, res) => {
     }
   });
 });
+
+app.get('/cart/total/:cartId', (req, res) => {
+  const cartId = req.params.cartId;
+
+  db.getConnection((err, connection) => {
+    if(err) throw err;
+
+    connection.query('CALL CalculateCartTotal(?, @totalAmount)', [cartId], (err, results) => {
+      if(err) throw err;
+      connection.query('SELECT @totalAmount AS totalAmount', (err, results) => {
+        connection.release(); 
+        if(err) throw err;
+        res.send(results[0]);
+      });
+    });
+  });
+});
