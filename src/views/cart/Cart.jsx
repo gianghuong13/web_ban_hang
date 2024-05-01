@@ -24,21 +24,27 @@ const CartView = () => {
           axios.get(`http://localhost:5000/api/user_cart/${userId}`)
             .then(response => {
               console.log(`response.data in cart is: ${JSON.stringify(response.data)}`);
-              setCartData(response.data);
   
               // Fetch details for each product in the cart
-              response.data.forEach(item => {
+              const cartItems = response.data.map(item => {
                 console.log(`item.product_id in cart is: ${item.product_id}`);
-                axios.get(`http://localhost:3001/api/product/${item.product_id}`)
+                return axios.get(`http://localhost:3001/api/product/${item.product_id}`)
                   .then(productResponse => {
-                    // Update productDetails state here
-                    setProductDetails(prevProductDetails => [...prevProductDetails, productResponse.data]);
-                    console.log(`productResponse.data in cart is: ${JSON.stringify(productResponse.data)}`);
+                    // Add product details to the item
+                    item.productDetails = productResponse.data;
+                    return item;
                   })
                   .catch(error => {
                     console.error('Error fetching product details:', error);
                   });
               });
+  
+              // Wait for all product details to be fetched
+              Promise.all(cartItems)
+                .then(completedItems => {
+                  // Update cartData state with the completed items
+                  setCartData(completedItems);
+                });
             })
             .catch(err => {
               console.error('Error fetching cart data:', err);
@@ -85,19 +91,17 @@ const CartView = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {cartData.map((item, index) => {
-                          // Find the product details for this item
-                          const product = productDetails.find(product => product.product_id === item.product_id);
+                      {cartData.map((item, index) => {
                           return (
                             <tr key={index}>
                               <td>
                                 <div className="row">
                                   <div className="col-3 d-none d-md-block">
-                                    <img src={product ? product.image : ''} width="80" alt="..." />
+                                    <img src={item.productDetails ? item.productDetails.image : ''} width="80" alt="..." />
                                   </div>
                                   <div className="col">
-                                    <Link to={`/product/detail/${item.productId}`} className="text-decoration-none">
-                                      {product ? product.name : ''}
+                                    <Link to={`/product/detail/${item.product_id}`} className="text-decoration-none">
+                                      {item.productDetails ? item.productDetails.name : ''}
                                     </Link>
                                     <p className="small text-muted">
                                       Size: {item.size}, Color: {item.color}, Brand: {item.brand}
