@@ -471,11 +471,10 @@ app.get('/api/user_cart/:userId', (req, res) => {
 });
 
 // Route to delete user cart from MySQL
-app.delete('/api/cart/:userId/remove-item/:itemId', (req, res) => {
-  const userId = req.params.userId;
-  const itemId = req.params.itemId;
-  const deleteQuery = 'DELETE FROM carts WHERE cart_id = ? AND product_id = ?';
-  db.query(deleteQuery, [userId, itemId], (err, result) => {
+app.delete('/api/cart/remove-item/:detailsId', (req, res) => {
+  const detailsId = req.params.detailsId;
+  const deleteQuery = 'DELETE FROM cartdetails WHERE cartdetails_id = ?';
+  db.query(deleteQuery, [detailsId], (err, result) => {
     if (err) {
       console.error('Error deleting item from user cart:', err);
       res.status(500).json({ error: 'Internal server error' });

@@ -73,6 +73,17 @@ const CartView = () => {
     alert(JSON.stringify(values));
   };
 
+  const deleteItem = (detailsId) => {
+    axios.delete(`http://localhost:5000/api/cart/remove-item/${detailsId}`)
+    .then((response) => {
+      console.log(response.data.message);
+      window.location.reload();
+    })
+    .catch((error) => {
+      console.error('Error deleting item:', error);
+    });
+  };
+
   return (
     <div>
       {isLoading ? (
@@ -102,6 +113,7 @@ const CartView = () => {
                       </thead>
                       <tbody>
                       {cartData.map((item, index) => {
+                        console.log(item);
                         return (
                           <tr key={index}>
                             <td>
@@ -138,7 +150,7 @@ const CartView = () => {
                                 <button className="btn btn-sm btn-outline-secondary me-2">
                                   <i className="bi bi-heart-fill"></i>
                                 </button>
-                                <button className="btn btn-sm btn-outline-danger">
+                                <button className="btn btn-sm btn-outline-danger" onClick={() => deleteItem(item.cartdetails_id)}>
                                   <i className="bi bi-trash"></i>
                                 </button>
                               </td>
