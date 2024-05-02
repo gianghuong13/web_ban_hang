@@ -17,8 +17,8 @@ const ProductSchema = mongoose.Schema({
     type: Number,
     required: true,
   },
-  color: [String], // Assuming color is an array of strings
-  size: [String], // Assuming size is an array of strings
+  colors: [String], // Assuming color is an array of strings
+  sizes: [String], // Assuming size is an array of strings
   price: {
     original: {
       type: Number,
@@ -60,8 +60,8 @@ function transformProductData(productData) {
     category_id: productData.category_id || "", // Use the category_id field
     available: productData.available || false, // Use the available field
     stock: productData.stock || 0, // Use the stock field
-    color: productData.color || [], // Use the color field
-    size: productData.size || [], // Use the size field
+    colors: productData.colors || [], // Use the color field
+    sizes: productData.sizes || [], // Use the size field
     price: productData.price ? {
       original: parseFloat(productData.price.original) || 0,
       discount: parseFloat(productData.price.discount) || 0,

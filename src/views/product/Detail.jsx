@@ -27,6 +27,8 @@ const ProductDetailView = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState(null);
   const [productId, setProductId] = useState(null); 
+  const [sizes, setSizes] = useState([]);
+  const [colors, setColors] = useState([]);
 
 
   useEffect(() => {
@@ -37,6 +39,10 @@ const ProductDetailView = () => {
         setProduct(response.data);
         setProductId(response.data._id);
         console.log('Product ID:', response.data._id);
+        setSizes(response.data.sizes);
+        setColors(response.data.colors);
+        console.log('Sizes:', response.data.sizes);
+        console.log('Colors:', response.data.colors);
       } catch (error) {
         console.error(error);
       }
@@ -132,75 +138,41 @@ const addToCart = () => {
                 <dt className="col-sm-3">Availability</dt>
                 <dd className="col-sm-9">In stock</dd>
                 <dt className="col-sm-3">Size</dt>
-                <dd className="col-sm-9">
-                  <div className="form-check form-check-inline">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      name="size"
-                      id="sizes"
-                      disabled
-                    />
-                    <label className="form-check-label" htmlFor="sizes">
-                      S
-                    </label>
-                  </div>
-                  <div className="form-check form-check-inline">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      name="size"
-                      id="sizem"
-                      disabled
-                    />
-                    <label className="form-check-label" htmlFor="sizem">
-                      M
-                    </label>
-                  </div>
-                  <div className="form-check form-check-inline">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      name="size"
-                      id="sizel"
-                    />
-                    <label className="form-check-label" htmlFor="sizel">
-                      L
-                    </label>
-                  </div>
-                  <div className="form-check form-check-inline">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      name="size"
-                      id="sizexl"
-                    />
-                    <label className="form-check-label" htmlFor="sizexl">
-                      XL
-                    </label>
-                  </div>
-                  <div className="form-check form-check-inline">
-                    <input
-                      className="form-check-input"
-                      type="radio"
-                      name="size"
-                      id="sizexxl"
-                    />
-                    <label className="form-check-label" htmlFor="sizexxl">
-                      XXL
-                    </label>
-                  </div>
-                </dd>
-                <dt className="col-sm-3">Color</dt>
-                <dd className="col-sm-9">
-                  <button className="btn btn-sm btn-primary p-2 me-2"></button>
-                  <button className="btn btn-sm btn-secondary p-2 me-2"></button>
-                  <button className="btn btn-sm btn-success p-2 me-2"></button>
-                  <button className="btn btn-sm btn-danger p-2 me-2"></button>
-                  <button className="btn btn-sm btn-warning p-2 me-2"></button>
-                  <button className="btn btn-sm btn-info p-2 me-2"></button>
-                  <button className="btn btn-sm btn-dark p-2 me-2"></button>
-                </dd>
+                  <dd className="col-sm-9">
+                    {sizes.map((size, index) => (
+                      <div className="form-check form-check-inline" key={index}>
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name="size"
+                          id={`size-${index}`}
+                          value={size}
+                          // Handle onChange event if needed
+                        />
+                        <label className="form-check-label" htmlFor={`size-${index}`}>
+                          {size}
+                        </label>
+                      </div>
+                    ))}
+                  </dd>
+                  <dt className="col-sm-3">Color</dt>
+                  <dd className="col-sm-9">
+                    {colors.map((color, index) => (
+                      <div key={index} className="form-check">
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name="colorOptions"
+                          id={`color${index}`}
+                          value={color}
+                          // Handle onChange event if needed
+                        />
+                        <label className="form-check-label" htmlFor={`color${index}`}>
+                          {color}
+                        </label>
+                      </div>
+                    ))}
+                  </dd>
               </dl>
 
               <div className="mb-3">
