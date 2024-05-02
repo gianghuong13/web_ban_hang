@@ -204,14 +204,13 @@ const addToCart = () => {
                     </button>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className="btn btn-sm btn-primary me-2"
-                  title="Add to cart"
-                  onClick={addToCart}
-                >
-                  <i className="bi bi-cart-plus me-1"></i>Add to cart
-                </button>
+                <button 
+                    className="btn btn-primary" 
+                    disabled={!selectedSize || !selectedColor}
+                    onClick={addToCart}
+                  >
+                    Add to Cart
+                  </button>
                 <button
                   type="button"
                   className="btn btn-sm btn-outline-secondary"
