@@ -127,9 +127,7 @@ class ProductListView extends Component {
                     this.state.currentProducts.map((product, idx) => {
                       return (
                         <div key={idx} className="col-md-12">
-                          <Link to={`/product/detail/${product.id}`}> {/* Use product._id instead of id */}
                             <CardProductList data={product} />
-                          </Link>
                         </div>
                       );
                     })}
