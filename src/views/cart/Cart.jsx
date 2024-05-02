@@ -102,23 +102,23 @@ const CartView = () => {
                       </thead>
                       <tbody>
                       {cartData.map((item, index) => {
-                          return (
-                            <tr key={index}>
-                              <td>
-                                <div className="row">
-                                  <div className="col-3 d-none d-md-block">
-                                    <img src={item.productDetails ? item.productDetails.image : ''} width="80" alt="..." />
-                                  </div>
-                                  <div className="col">
-                                    <Link to={`/product/detail/${item.product_id}`} className="text-decoration-none">
-                                      {item.productDetails ? item.productDetails.name : ''}
-                                    </Link>
-                                    <p className="small text-muted">
-                                      Size: {item.size}, Color: {item.color}, Brand: {item.brand}
-                                    </p>
-                                  </div>
+                        return (
+                          <tr key={index}>
+                            <td>
+                              <div className="row">
+                                <div className="col-3 d-none d-md-block">
+                                  <img src={item.productDetails ? item.productDetails.image : ''} width="80" alt="..." />
                                 </div>
-                              </td>
+                                <div className="col">
+                                  <Link to={`/product/detail/${item.product_id}`} className="text-decoration-none">
+                                    {item.productDetails ? item.productDetails.name : ''}
+                                  </Link>
+                                  <p className="small text-muted">
+                                    {item.note} {/* Display the note here */}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
                               <td>
                                 <div className="input-group input-group-sm mw-140">
                                   <button className="btn btn-primary text-white" type="button">

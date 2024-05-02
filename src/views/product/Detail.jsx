@@ -29,7 +29,8 @@ const ProductDetailView = () => {
   const [productId, setProductId] = useState(null); 
   const [sizes, setSizes] = useState([]);
   const [colors, setColors] = useState([]);
-
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -68,7 +69,7 @@ const addToCart = () => {
       console.log('Adding product to cart:', product);
       const quantity = 1;
 
-      axios.post(`http://localhost:5000/api/cart/${response.data.user_id}/add-item`, { productId, quantity })
+      axios.post(`http://localhost:5000/api/cart/${response.data.user_id}/add-item`, { productId, quantity, note: `Size: ${selectedSize}, Color: ${selectedColor}` })
       .then(response => {
         if (response.status === 200) {
           console.log('Cart updated successfully');
@@ -138,41 +139,40 @@ const addToCart = () => {
                 <dt className="col-sm-3">Availability</dt>
                 <dd className="col-sm-9">In stock</dd>
                 <dt className="col-sm-3">Size</dt>
-                  <dd className="col-sm-9">
-                    {sizes.map((size, index) => (
-                      <div className="form-check form-check-inline" key={index}>
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          name="size"
-                          id={`size-${index}`}
-                          value={size}
-                          // Handle onChange event if needed
-                        />
-                        <label className="form-check-label" htmlFor={`size-${index}`}>
-                          {size}
-                        </label>
-                      </div>
-                    ))}
-                  </dd>
-                  <dt className="col-sm-3">Color</dt>
-                  <dd className="col-sm-9">
-                    {colors.map((color, index) => (
-                      <div key={index} className="form-check">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          name="colorOptions"
-                          id={`color${index}`}
-                          value={color}
-                          // Handle onChange event if needed
-                        />
-                        <label className="form-check-label" htmlFor={`color${index}`}>
-                          {color}
-                        </label>
-                      </div>
-                    ))}
-                  </dd>
+                <dd className="col-sm-9">
+                  {sizes.map((size, index) => (
+                    <div className="form-check form-check-inline" key={index}>
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        name="size"
+                        id={`size-${index}`}
+                        value={size}
+                        onChange={(e) => setSelectedSize(e.target.value)} // Add this line
+                      />
+                      <label className="form-check-label" htmlFor={`size-${index}`}>
+                        {size}
+                      </label>
+                    </div>
+                  ))}
+                </dd>
+                <dd className="col-sm-9">
+                  {colors.map((color, index) => (
+                    <div key={index} className="form-check">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        name="colorOptions"
+                        id={`color${index}`}
+                        value={color}
+                        onChange={(e) => setSelectedColor(e.target.value)} // Add this line
+                      />
+                      <label className="form-check-label" htmlFor={`color${index}`}>
+                        {color}
+                      </label>
+                    </div>
+                  ))}
+                </dd>
               </dl>
 
               <div className="mb-3">

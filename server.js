@@ -366,7 +366,7 @@ app.post('/api/cart/:userId/add-item', async (req, res) => {
   console.log(req.params);
   const userId = req.params.userId;
   console.log(`req.params.userId is: ${req.params.userId}`);
-  const { productId, quantity } = req.body;
+  const { productId, quantity, note } = req.body;
 
   try {
     // Retrieve product details from MongoDB
@@ -386,8 +386,8 @@ app.post('/api/cart/:userId/add-item', async (req, res) => {
 
       if (results.length > 0) {
         // Cart exists, check if the product is already in the cart
-        const checkProductQuery = 'SELECT * FROM cartdetails WHERE cart_id = ? AND product_id = ?';
-        db.query(checkProductQuery, [userId, productId], (err, productResults) => {
+        const checkProductQuery = 'SELECT * FROM cartdetails WHERE cart_id = ? AND product_id = ? AND note = ?';
+        db.query(checkProductQuery, [userId, productId, note], (err, productResults) => {
           if (err) {
             console.error('Error checking product in cart:', err);
             return res.status(500).json({ error: 'Error checking product in cart' });
@@ -395,8 +395,8 @@ app.post('/api/cart/:userId/add-item', async (req, res) => {
 
           if (productResults.length > 0) {
             // Product is already in the cart, update the quantity
-            const updateQuery = 'UPDATE cartdetails SET quantity = quantity + ?, priceEach = ? WHERE cart_id = ? AND product_id = ?';
-            db.query(updateQuery, [quantity, price, userId, productId], (err, result) => {
+            const updateQuery = 'UPDATE cartdetails SET quantity = quantity + ?, priceEach = ?, note = ? WHERE cart_id = ? AND product_id = ? AND note = ?';
+            db.query(updateQuery, [quantity, price, note, userId, productId, note], (err, result) => {
               if (err) {
                 console.error('Error updating cart:', err);
                 return res.status(500).json({ error: 'Error updating cart' });
@@ -405,8 +405,8 @@ app.post('/api/cart/:userId/add-item', async (req, res) => {
             });
           } else {
             // Product is not in the cart, add it
-            const insertQuery = 'INSERT INTO cartdetails (cart_id, product_id, quantity, priceEach) VALUES (?, ?, ?, ?)';
-            db.query(insertQuery, [userId, productId, quantity, price], (err, result) => {
+            const insertQuery = 'INSERT INTO cartdetails (cart_id, product_id, quantity, priceEach, note) VALUES (?, ?, ?, ?, ?)';
+            db.query(insertQuery, [userId, productId, quantity, price, note], (err, result) => {
               if (err) {
                 console.error('Error adding product to cart:', err);
                 return res.status(500).json({ error: 'Error adding product to cart' });
@@ -425,8 +425,8 @@ app.post('/api/cart/:userId/add-item', async (req, res) => {
           }
 
           // Add the product to the cart
-          const insertProductQuery = 'INSERT INTO cartdetails (cart_id, product_id, quantity, priceEach) VALUES (?, ?, ?, ?)';
-          db.query(insertProductQuery, [userId, productId, quantity, price], (err, result) => {
+          const insertProductQuery = 'INSERT INTO cartdetails (cart_id, product_id, quantity, priceEach, note) VALUES (?, ?, ?, ?, ?)';
+          db.query(insertProductQuery, [userId, productId, quantity, price, note], (err, result) => {
             if (err) {
               console.error('Error adding product to cart:', err);
               return res.status(500).json({ error: 'Error adding product to cart' });

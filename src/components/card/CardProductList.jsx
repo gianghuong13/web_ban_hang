@@ -40,16 +40,16 @@ const CardProductList = (props) => {
                     );
                 })}
             </div>
-            {product.description &&
-              product.description.includes("|") === false && (
-                <p className="small mt-2">{product.description}</p>
+              {product.description &&
+                product.description.includes("|") === false && (
+                  <p className="small mt-2">{product.description.substring(0, 50)}</p>
               )}
-            {product.description && product.description.includes("|") && (
-              <ul className="mt-2">
-                {product.description.split("|").map((desc, idx) => (
-                  <li key={idx}>{desc}</li>
-                ))}
-              </ul>
+              {product.description && product.description.includes("|") && (
+                <ul className="mt-2">
+                  {product.description.split("|").map((desc, idx) => (
+                    <li key={idx}>{desc.substring(0, 50)}</li>
+                  ))}
+                </ul>
             )}
           </div>
         </div>
