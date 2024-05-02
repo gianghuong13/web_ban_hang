@@ -12,7 +12,8 @@ const CartView = () => {
   const [cartData, setCartData] = useState([]);
   const [productDetails, setProductDetails] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
-
+  const [userId, setUserId] = useState(null);
+  const [detailsId, setDetailsId] = useState(null);
 
   useEffect(() => {
     axios.get('http://localhost:5000/account/user', { withCredentials: true })
@@ -20,6 +21,7 @@ const CartView = () => {
         setIsLoading(false);
         if (response.data.valid) {
           setIsLoggedIn(true);
+          setUserId(response.data.user_id);
           const userId = response.data.user_id;
   
           axios.get(`http://localhost:5000/api/user_cart/${userId}`)
@@ -84,6 +86,17 @@ const CartView = () => {
     });
   };
 
+  const updateQuantity = (userId, detailsId, quantity) => {
+    axios.put(`http://localhost:5000/api/cart/${userId}/update-item/${detailsId}`, { quantity })
+      .then((response) => {
+        console.log(response.data.message);
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.error('Error updating item quantity:', error);
+      });
+  };
+  
   return (
     <div>
       {isLoading ? (
@@ -133,11 +146,24 @@ const CartView = () => {
                             </td>
                               <td>
                                 <div className="input-group input-group-sm mw-140">
-                                  <button className="btn btn-primary text-white" type="button">
+                                <button 
+                                    className="btn btn-primary text-white" 
+                                    type="button" 
+                                    onClick={() => updateQuantity(userId, item.cartdetails_id, item.quantity - 1)}
+                                  >
                                     <i className="bi bi-dash-lg"></i>
                                   </button>
-                                  <input type="text" className="form-control" defaultValue={item.quantity} />
-                                  <button className="btn btn-primary text-white" type="button">
+                                  <input 
+                                    type="text" 
+                                    className="form-control" 
+                                    defaultValue={item.quantity} 
+                                    onChange={(e) => updateQuantity(userId, item.cartdetails_id, e.target.value)}
+                                  />
+                                  <button 
+                                    className="btn btn-primary text-white" 
+                                    type="button" 
+                                    onClick={() => updateQuantity(userId, item.cartdetails_id, item.quantity + 1)}
+                                  >
                                     <i className="bi bi-plus-lg"></i>
                                   </button>
                                 </div>

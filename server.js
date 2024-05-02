@@ -442,12 +442,12 @@ app.post('/api/cart/:userId/add-item', async (req, res) => {
   }
 });
 // Route to update user cart in MySQL
-app.put('/api/cart/:userId/update-item/:itemId', (req, res) => {
+app.put('/api/cart/:userId/update-item/:detailsId', (req, res) => {
   const userId = req.params.userId;
-  const itemId = req.params.itemId;
+  const detailsId = req.params.detailsId;
   const { quantity } = req.body;
-  const updateQuery = 'UPDATE carts SET quantity = ? WHERE cart_id = ? AND product_id = ?';
-  db.query(updateQuery, [quantity, userId, itemId], (err, result) => {
+  const updateQuery = 'UPDATE cartdetails SET quantity = ? WHERE cartdetails_id = ? AND cart_id = ?';
+  db.query(updateQuery, [quantity, detailsId, userId], (err, result) => {
     if (err) {
       console.error('Error updating item quantity in user cart:', err);
       res.status(500).json({ error: 'Internal server error' });
