@@ -12,11 +12,14 @@ import {
   name,
   email,
 } from "../../helpers/validation";
+import { CountryDropdown, RegionDropdown, CityDropdown } from 'react-country-region-selector';
+
 import { ReactComponent as IconPerson } from "bootstrap-icons/icons/person.svg";
 import { ReactComponent as IconPhone } from "bootstrap-icons/icons/phone.svg";
 import { ReactComponent as IconEnvelop } from "bootstrap-icons/icons/envelope.svg";
 import { ReactComponent as IconGeoAlt } from "bootstrap-icons/icons/geo-alt.svg";
 import { ReactComponent as IconCalendarEvent } from "bootstrap-icons/icons/calendar-event.svg";
+import { ReactComponent as IconCheck2 } from "bootstrap-icons/icons/check2.svg";
 
 const ProfileForm = (props) => {
   const {
@@ -28,6 +31,8 @@ const ProfileForm = (props) => {
   } = props;
     const [isLoading, setIsLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [country, setCountry] = useState('');
+    const [province, setProvince] = useState('');
     useEffect(() => {
       axios.get('http://localhost:5000/account/user', { withCredentials: true })
         .then(response => {
@@ -104,6 +109,57 @@ const ProfileForm = (props) => {
           </button>
         </div>
       </div>
+      <div className="card border-primary">
+          <h6 className="card-header">
+            <i className="bi bi-geo-alt-fill" /> Address Detail
+          </h6>
+          <ul className="list-group list-group-flush">
+          <li className="list-group-item">
+              <label>Country</label>
+              <CountryDropdown
+                value={country}
+                onChange={(val) => setCountry(val)}
+              />
+            </li>
+            <li className="list-group-item">
+              <label>Province</label>
+              <RegionDropdown
+                country={country}
+                value={province}
+                onChange={(val) => setProvince(val)}
+              />
+            </li>
+            <li className="list-group-item">
+              <label>City</label>
+              <Field
+                name="city"
+                type="text"
+                component={renderFormGroupField}
+                placeholder="City"
+                icon={IconGeoAlt}
+                validate={[required]}
+                required={true}
+              />
+            </li>
+            <li className="list-group-item">
+              <label>Address</label>
+              <Field
+                name="address"
+                type="text"
+                component={renderFormGroupField}
+                placeholder="Address"
+                icon={IconGeoAlt}
+                validate={[required]}
+                required={true}
+              />
+            </li>
+          </ul>
+          <div className="card-footer text-end">
+            <button type="submit" className="btn btn-primary">
+              <i className="bi bi-check2" /> Submit
+            </button>
+          </div>
+        </div>
     </form>
   );
 };

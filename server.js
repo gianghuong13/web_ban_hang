@@ -70,6 +70,7 @@ app.get('/account/user', (req, res) => {
   }
 });
 
+
 app.put('/account/password', async (req, res) => {
   if (!req.session.username) {
     // No user is logged in, return an error message
