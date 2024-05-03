@@ -119,7 +119,7 @@ const CartView = () => {
                             Quantity
                           </th>
                           <th scope="col" width={150}>
-                            Price
+                            Price Each
                           </th>
                           <th scope="col" className="text-end" width={130}></th>
                         </tr>

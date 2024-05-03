@@ -4,8 +4,8 @@ const ChangePasswordForm = lazy(() =>
   import("../../components/account/ChangePasswordForm")
 );
 const SettingForm = lazy(() => import("../../components/account/SettingForm"));
-const CardListForm = lazy(() =>
-  import("../../components/account/CardListForm")
+const AddressForm = lazy(() =>
+  import("../../components/account/AddressForm")
 );
 
 class MyProfileView extends Component {
@@ -52,7 +52,7 @@ class MyProfileView extends Component {
             <br></br>
             <SettingForm />
             <br></br>
-            <CardListForm />
+            <AddressForm />
           </div>
         </div>
       </div>

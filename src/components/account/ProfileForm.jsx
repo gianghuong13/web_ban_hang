@@ -12,14 +12,9 @@ import {
   name,
   email,
 } from "../../helpers/validation";
-import { CountryDropdown, RegionDropdown, CityDropdown } from 'react-country-region-selector';
-
-import { ReactComponent as IconPerson } from "bootstrap-icons/icons/person.svg";
 import { ReactComponent as IconPhone } from "bootstrap-icons/icons/phone.svg";
 import { ReactComponent as IconEnvelop } from "bootstrap-icons/icons/envelope.svg";
-import { ReactComponent as IconGeoAlt } from "bootstrap-icons/icons/geo-alt.svg";
-import { ReactComponent as IconCalendarEvent } from "bootstrap-icons/icons/calendar-event.svg";
-import { ReactComponent as IconCheck2 } from "bootstrap-icons/icons/check2.svg";
+
 
 const ProfileForm = (props) => {
   const {
@@ -64,104 +59,56 @@ const ProfileForm = (props) => {
     return <div>Loading...</div>;
   }
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className={`needs-validation ${submitFailed ? "was-validated" : ""}`}
-      noValidate
-    >
-      <div className="card border-primary">
-        <h6 className="card-header">
-          <i className="bi bi-person-lines-fill" /> Profile Detail
-        </h6>
-        <ul className="list-group list-group-flush">
-          <li className="list-group-item">
-            <Field
-              name="mobileNumber"
-              type="number"
-              component={renderFormGroupField}
-              placeholder="Mobile no without country code"
-              icon={IconPhone}
-              validate={[required, maxLengthMobileNo, minLengthMobileNo, digit]}
-              required={true}
-              max="999999999999999"
-              min="9999"
-            />
-          </li>
-          <li className="list-group-item">
-            <Field
-              name="email"
-              type="email"
-              component={renderFormGroupField}
-              placeholder="Your email"
-              icon={IconEnvelop}
-              validate={[required, email]}
-              required={true}
-            />
-          </li>
-        </ul>
-        <div className="card-body">
-          <button
-          type="submit"
-          className="btn btn-primary d-flex"
-          disabled={submitting}
-          >
-            Submit
-          </button>
-        </div>
-      </div>
-      <div className="card border-primary">
+    <>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className={`needs-validation ${submitFailed ? "was-validated" : ""}`}
+        noValidate
+      >
+        <div className="card border-primary">
           <h6 className="card-header">
-            <i className="bi bi-geo-alt-fill" /> Address Detail
+            <i className="bi bi-person-lines-fill" /> Profile Detail
           </h6>
           <ul className="list-group list-group-flush">
-          <li className="list-group-item">
-              <label>Country</label>
-              <CountryDropdown
-                value={country}
-                onChange={(val) => setCountry(val)}
-              />
-            </li>
             <li className="list-group-item">
-              <label>Province</label>
-              <RegionDropdown
-                country={country}
-                value={province}
-                onChange={(val) => setProvince(val)}
-              />
-            </li>
-            <li className="list-group-item">
-              <label>City</label>
               <Field
-                name="city"
-                type="text"
+                name="mobileNumber"
+                type="number"
                 component={renderFormGroupField}
-                placeholder="City"
-                icon={IconGeoAlt}
-                validate={[required]}
+                placeholder="Mobile no without country code"
+                icon={IconPhone}
+                validate={[required, maxLengthMobileNo, minLengthMobileNo, digit]}
                 required={true}
+                max="999999999999999"
+                min="9999"
               />
             </li>
             <li className="list-group-item">
-              <label>Address</label>
               <Field
-                name="address"
-                type="text"
+                name="email"
+                type="email"
                 component={renderFormGroupField}
-                placeholder="Address"
-                icon={IconGeoAlt}
-                validate={[required]}
+                placeholder="Your email"
+                icon={IconEnvelop}
+                validate={[required, email]}
                 required={true}
               />
             </li>
           </ul>
-          <div className="card-footer text-end">
-            <button type="submit" className="btn btn-primary">
-              <i className="bi bi-check2" /> Submit
+          <div className="card-body">
+            <button
+              type="submit"
+              className="btn btn-primary d-flex"
+              disabled={submitting}
+            >
+              Submit
             </button>
           </div>
         </div>
-    </form>
+      </form> {/* Closing the first form here */}
+    </>
   );
+  
 };
 
 export default compose(

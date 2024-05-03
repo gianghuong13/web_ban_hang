@@ -276,6 +276,18 @@ app.get('/account/signout', (req, res) => {
   });
 });
 
+function insertAddress(req, res, country, province, city, address, primary) {
+  const query = 'INSERT INTO address (user_id, country, province, city, address, `primary`) VALUES (?, ?, ?, ?, ?, ?)';
+  db.query(query, [req.session.user_id, country, province, city, address, primary ? 1 : 0], (err, results) => {
+    if (err) {
+      res.status(500).json({ message: err.toString() });
+      return;
+    }
+
+    res.status(200).json({ message: 'Address added successfully' });
+  });
+}
+
 app.put('/account/profile', async (req, res) => {
   console.log('PUT /account/profile called');
 
@@ -290,6 +302,53 @@ app.put('/account/profile', async (req, res) => {
       res.status(200).json({ message: 'User data updated successfully' });
     }
   });
+});
+
+app.post('/account/:userId/address', async (req, res) => {
+  if (!req.session.user_id) {
+    // No user is logged in, return an error message
+    res.status(401).json({ valid: false, message: 'Not authenticated' });
+    return;
+  }
+
+  const { country, province, city, address, primary } = req.body;
+
+  // Validate the input
+  if (!country || !province || !city || !address) {
+    res.status(400).json({ message: 'All fields are required' });
+    return;
+  }
+
+  // If the new address is primary, check if there's already a primary address for the user
+  if (primary) {
+    const checkQuery = 'SELECT * FROM address WHERE user_id = ? AND `primary` = 1';
+    db.query(checkQuery, [req.session.user_id], (err, results) => {
+      if (err) {
+        res.status(500).json({ message: err.toString() });
+        return;
+      }
+
+      // If there's already a primary address, update it to be non-primary
+      if (results.length > 0) {
+        const updateQuery = 'UPDATE address SET `primary` = 0 WHERE user_id = ? AND `primary` = 1';
+        db.query(updateQuery, [req.session.user_id], (err, results) => {
+          if (err) {
+            res.status(500).json({ message: err.toString() });
+            return;
+          }
+
+          // Continue to insert the new address
+          insertAddress(req, res, country, province, city, address, primary);
+        });
+      } else {
+        // Continue to insert the new address
+        insertAddress(req, res, country, province, city, address, primary);
+      }
+    });
+  } else {
+    // Continue to insert the new address
+    insertAddress(req, res, country, province, city, address, primary);
+  }
 });
 
 app.get('/api/categories', (req, res) => {
