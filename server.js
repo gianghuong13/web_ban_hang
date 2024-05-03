@@ -183,7 +183,7 @@ app.listen(5000, () => {
 });
 app.post('/account/signup', async (req, res) => {
   console.log(req.body);
-  const {firstName, lastName, username, email, password } = req.body;
+  const {firstName, lastName, username, email, phone, password } = req.body;
 
   // Check for duplicate username or email
   const checkQuery = 'SELECT * FROM users WHERE username = ? OR email = ?';
@@ -202,8 +202,8 @@ app.post('/account/signup', async (req, res) => {
           const hashedPassword = await bcrypt.hash(password.toString(), 10);
 
           // Insert the new user into the database
-          const insertQuery = 'INSERT INTO users (first_name, last_name, username, email, password, registeredAt) VALUES (?, ?, ?, ?, ?, NOW())';
-          db.query(insertQuery, [firstName, lastName, username, email, hashedPassword], (err, result) => {
+          const insertQuery = 'INSERT INTO users (first_name, last_name, username, email, phone, password, registeredAt) VALUES (?, ?, ?, ?, ?, ?, NOW())';
+          db.query(insertQuery, [firstName, lastName, username, email, phone, hashedPassword], (err, result) => {
             if (err) {
               console.log(err);
               res.status(500).json({ message: err.toString() });
@@ -520,6 +520,19 @@ app.put('/api/cart/:userId/update-item/:detailsId', (req, res) => {
 app.get('/api/user_cart/:userId', (req, res) => {
   const userId = req.params.userId;
   const query = `SELECT * FROM user_cart_view WHERE user_id = ?`;
+  db.query(query, [userId], (error, results, fields) => {
+    if (error) {
+      console.error('Error fetching user cart data:', error);
+      res.status(500).json({ error: 'Error fetching user cart data' });
+    } else {
+      res.json(results);
+    }
+  });
+});
+
+app.get('/api/checkout/:userId', (req, res) => {
+  const userId = req.params.userId;
+  const query = `SELECT * FROM user_profile_view WHERE user_id = ?`;
   db.query(query, [userId], (error, results, fields) => {
     if (error) {
       console.error('Error fetching user cart data:', error);

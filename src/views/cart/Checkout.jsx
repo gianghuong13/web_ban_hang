@@ -1,4 +1,48 @@
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import axios from 'axios';
+
 const CheckoutView = () => {
+  const [cartData, setCartData] = useState([]);
+  const [totalAmount, setTotalAmount] = useState(0);
+  useEffect(() => {
+    axios.get('http://localhost:5000/account/user', { withCredentials: true })
+      .then(response => {
+        if (response.data.valid) {
+          const userId = response.data.user_id;
+
+          axios.get(`http://localhost:5000/api/user_cart/${userId}`)
+            .then(response => {
+              const cartItems = response.data.map(item => {
+                return axios.get(`http://localhost:3001/api/product/${item.product_id}`)
+                  .then(productResponse => {
+                    item.productDetails = productResponse.data;
+                    console.log('Item:', item);
+                    return item;
+                  });
+              });
+
+              Promise.all(cartItems)
+                .then(completedItems => {
+                  setCartData(completedItems);
+                });
+            });
+
+          axios.get(`http://localhost:5000/cart/total/${userId}`)
+            .then(response => {
+              setTotalAmount(response.data.totalAmount);
+            });
+        } else {
+          window.location.href = '/account/signin';
+        }
+      })
+      .catch(err => {
+        window.location.href = '/account/signin';
+      });
+  }, []);
+  const onSubmitApplyCouponCode = async (values) => {
+    alert(JSON.stringify(values));
+  };
   return (
     <div>
       <div className="bg-secondary border-top p-4 text-white mb-3">
@@ -248,42 +292,23 @@ const CheckoutView = () => {
           </div>
           <div className="col-md-4">
             <div className="card">
-              <div className="card-header">
+            <div className="card-header">
                 <i className="bi bi-cart3"></i> Cart{" "}
-                <span className="badge bg-secondary float-end">3</span>
+                <span className="badge bg-secondary float-end">{cartData.length}</span>
               </div>
               <ul className="list-group list-group-flush">
-                <li className="list-group-item d-flex justify-content-between lh-sm">
-                  <div>
-                    <h6 className="my-0">Product name</h6>
-                    <small className="text-muted">Brief description</small>
-                  </div>
-                  <span className="text-muted">$150</span>
-                </li>
-                <li className="list-group-item d-flex justify-content-between lh-sm">
-                  <div>
-                    <h6 className="my-0">Second product</h6>
-                    <small className="text-muted">Brief description</small>
-                  </div>
-                  <span className="text-muted">$12</span>
-                </li>
-                <li className="list-group-item d-flex justify-content-between lh-sm">
-                  <div>
-                    <h6 className="my-0">Third item</h6>
-                    <small className="text-muted">Brief description</small>
-                  </div>
-                  <span className="text-muted">$50</span>
-                </li>
-                <li className="list-group-item d-flex justify-content-between bg-light">
-                  <div className="text-success">
-                    <h6 className="my-0">Promo code</h6>
-                    <small>EXAMPLECODE</small>
-                  </div>
-                  <span className="text-success">−$50</span>
-                </li>
+                {cartData.map((item, index) => (
+                  <li key={index} className="list-group-item d-flex justify-content-between lh-sm">
+                    <div>
+                      <h6 className="my-0">{item.productDetails.name}</h6>
+                      <small className="text-muted">{item.note}, {`Quantity: ${item.quantity}`} </small>
+                    </div>
+                    <span className="text-muted">${item.productDetails.price.price}</span>
+                  </li>
+                ))}
                 <li className="list-group-item d-flex justify-content-between">
                   <span>Total (USD)</span>
-                  <strong>$162</strong>
+                  <strong>${totalAmount}</strong>
                 </li>
               </ul>
             </div>

@@ -7,10 +7,14 @@ import {
   required,
   maxLength20,
   minLength8,
+  maxLengthMobileNo,
+  minLengthMobileNo,
+  digit,
   name,
 } from "../../helpers/validation";
-import { ReactComponent as IconEmail } from "bootstrap-icons/icons/envelope-open-fill.svg";
+import { ReactComponent as IconPhone } from "bootstrap-icons/icons/phone.svg";
 import { ReactComponent as IconShieldLock } from "bootstrap-icons/icons/shield-lock.svg";
+import { ReactComponent as IconEmail } from "bootstrap-icons/icons/envelope-open-fill.svg";
 
 const submitForm = (values) => {
   console.log("button pressed")
@@ -81,6 +85,19 @@ const SignUpForm = (props) => {
       validate={[required, name]}
       required={true}
     />
+    <Field
+        name="phone"
+        type="number"
+        label="Phone"
+        component={renderFormGroupField}
+        placeholder="Mobile no without country code"
+        icon={IconPhone}
+        validate={[required, maxLengthMobileNo, minLengthMobileNo, digit]}
+        required={true}
+        max="999999999999999"
+        min="9999"
+        className="mb-3"
+      />
   </div>
       </div>
       <Field
