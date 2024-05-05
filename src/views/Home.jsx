@@ -78,8 +78,8 @@ class HomeView extends Component {
               <CardImage src="../../images/banner/Watches.webp" to="promo" />
             </div>
           </div>
-        </div>
-        <div className="container-fluid bg-light mb-3">
+        </div> */}
+        {/* <div className="container-fluid bg-light mb-3">
           <div className="row">
             <div className="col-md-12">
               <CardDealsOfTheDay

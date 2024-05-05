@@ -3,11 +3,26 @@ import { Link } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
 
+const CardLogin = lazy(() => import("../components/card/CardLogin"));
+
+
 
 const Search = lazy(() => import("./Search"));
 
 const Header = () => {
   const [username, setUsername] = useState(null);
+  useEffect(() => {
+    axios.get('http://localhost:5000/account/user', { withCredentials: true })
+      .then(res => {
+        if (res.data.valid) {
+          setUsername(res.data.username);
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }, []);
+
   const handleLogout = () => {
     axios.get('http://localhost:5000/account/signout', { withCredentials: true })
       .then(() => {
@@ -99,6 +114,11 @@ const Header = () => {
             </div>
             {/* <Link to="/account/signin">Sign In</Link> |{" "}
               <Link to="/account/signup"> Sign Up</Link> */}
+              {username ? (
+          <button onClick={handleLogout} style={{ fontFamily: "Lucida Console", fontSize: '15px', textDecoration: 'none', color:'black', border: 'none', background: 'none', padding: 0}}>Logout</button>
+        ) : (
+          <Link to='/account/signin' style={{ fontFamily: "Lucida Console", fontSize: '15px', textDecoration: 'none', color:'black'}}>Sign in</Link>
+        )}
           </div>
         </div>
       </div>
@@ -106,3 +126,4 @@ const Header = () => {
   );
 };
 export default Header;
+
