@@ -65,7 +65,7 @@ class HomeView extends Component {
     return (
       <React.Fragment>
         <Banner className="mb-3" id="carouselHomeBanner" data={data.banner} />
-        <div className="container-fluid bg-light mb-3">
+        {/* <div className="container-fluid bg-light mb-3">
           <div className="row g-3">
             <div className="col-md-9">
               <Carousel id="elect-product-category" className="mb-3">
@@ -93,7 +93,7 @@ class HomeView extends Component {
               </CardDealsOfTheDay>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="bg-info bg-gradient p-3 text-center mb-3">
           <h4 className="m-0">Explore Fashion Collection</h4>
@@ -103,41 +103,41 @@ class HomeView extends Component {
             <div className="col-md-3">
               <Link to="/" className="text-decoration-none">
                 <img
-                  src="../../images/category/male.webp"
+                  src="../../images/category/skirt.jpg"
                   className="img-fluid rounded-circle"
                   alt="..."
                 />
-                <div className="text-center h6">Men's Clothing</div>
+                <div className="text-center h6">Skirt</div>
               </Link>
             </div>
             <div className="col-md-3">
               <Link to="/" className="text-decoration-none">
                 <img
-                  src="../../images/category/female.webp"
+                  src="../../images/category/dress.jpg"
                   className="img-fluid rounded-circle"
                   alt="..."
                 />
-                <div className="text-center h6">Women's Clothing</div>
+                <div className="text-center h6">Dress</div>
               </Link>
             </div>
             <div className="col-md-3">
               <Link to="/" className="text-decoration-none">
                 <img
-                  src="../../images/category/smartwatch.webp"
+                  src="../../images/category/JACKET.jpg"
                   className="img-fluid rounded-circle"
                   alt="..."
                 />
-                <div className="text-center h6">Smartwatch</div>
+                <div className="text-center h6">Jacket</div>
               </Link>
             </div>
             <div className="col-md-3">
               <Link to="/" className="text-decoration-none">
                 <img
-                  src="../../images/category/footwear.webp"
+                  src="../../images/category/PANTS.jpg"
                   className="img-fluid rounded-circle"
                   alt="..."
                 />
-                <div className="text-center h6">Footwear</div>
+                <div className="text-center h6">Pants</div>
               </Link>
             </div>
           </div>

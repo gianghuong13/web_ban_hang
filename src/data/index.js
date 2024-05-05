@@ -2,21 +2,21 @@ export const data = {
   banner: [
     {
       to: "/link",
-      img: "../../images/banner/Banner_2.webp",
-      title: "First slide label",
-      description: "Nulla vitae elit libero, a pharetra augue mollis interdum",
+      img: "../../images/banner/test3.jpg",
+      title: "SPRING 2024 COLLECTION",
+      description: "Spring looks are realized in unexpected fabrics, like raffia and chambray, while coral and turquoise trim serve as inspired details.",
     },
     {
       to: "/link",
-      img: "../../images/banner/Banner_3.webp",
-      title: "Second slide label",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      img: "../../images/banner/test.jpg",
+      title: "WOMEN'S READY-TO-WEAR",
+      description: "Balenciaga Summer 24 Collection",
     },
     {
       to: "/link",
-      img: "../../images/banner/Banner_1.webp",
-      title: "Third slide label",
-      description: " Praesent commodo cursus magna, vel scelerisque nisl.",
+      img: "../../images/banner/test2.jpg",
+      title: "MARINIÈRE LOOK",
+      description: " Bold stripes, gold detailing and soft ruffles characterize the spring's versatile wardrobe with sophisticated marinière allure.",
     },
   ],
   iconProducts: [

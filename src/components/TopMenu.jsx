@@ -5,7 +5,7 @@ const TopMenu = () => {
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark p-0">
       <div className="container-fluid">
         <Link className="navbar-brand" to="/">
-          E-Commerce
+          Women's Fashion
         </Link>
         <button
           className="navbar-toggler"
@@ -28,10 +28,10 @@ const TopMenu = () => {
                 aria-expanded="false"
                 data-bs-toggle="dropdown"
               >
-                All Pages
+                Menu
               </button>
               <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li>
+                {/* <li>
                   <Link className="dropdown-item" to="/account/signin">
                     Sign In
                   </Link>
@@ -39,6 +39,34 @@ const TopMenu = () => {
                 <li>
                   <Link className="dropdown-item" to="/account/signup">
                     Sign Up
+                  </Link>
+                </li>
+                <li>
+                  <hr className="dropdown-divider" />
+                </li> */}
+                <li>
+                  <Link className="dropdown-item" to="/category">
+                    Ready-to-wear
+                  </Link>
+                </li>
+                <li>
+                  <Link className="dropdown-item" to="/category">
+                    Skirt
+                  </Link>
+                </li>
+                <li>
+                  <Link className="dropdown-item" to="/category">
+                    Dress
+                  </Link>
+                </li>
+                <li>
+                  <Link className="dropdown-item" to="/category">
+                    Pants
+                  </Link>
+                </li>
+                <li>
+                  <Link className="dropdown-item" to="/category">
+                    Jacket
                   </Link>
                 </li>
                 <li>
@@ -54,7 +82,7 @@ const TopMenu = () => {
                     Contact Us
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <Link className="dropdown-item" to="/blog">
                     Blog
                   </Link>
@@ -63,8 +91,8 @@ const TopMenu = () => {
                   <Link className="dropdown-item" to="/blog/detail">
                     Blog Detail
                   </Link>
-                </li>
-                <li>
+                </li> */}
+                {/* <li>
                   <hr className="dropdown-divider" />
                 </li>
                 <li>
@@ -76,15 +104,25 @@ const TopMenu = () => {
                   <Link className="dropdown-item" to="/500">
                     500 Internal Server Error
                   </Link>
-                </li>
+                </li> */}
               </ul>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/account/signin">
+              Sign In
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/account/signup">
+                Sign Up
+              </Link>
             </li>
             <li className="nav-item">
               <Link className="nav-link" to="/category">
                 Fashion
               </Link>
             </li>
-            <li className="nav-item">
+            {/* <li className="nav-item">
               <Link className="nav-link" to="/category">
                 Supermarket
               </Link>
@@ -113,7 +151,7 @@ const TopMenu = () => {
               <Link className="nav-link" to="/documentation">
                 Documentation
               </Link>
-            </li>
+            </li> */}
           </ul>
         </div>
       </div>

@@ -46,9 +46,9 @@ class ProductListView extends Component {
      console.log(this.state.currentProducts);
     return (
       <React.Fragment>
-        <div className="p-5 bg-primary bs-cover" style={{backgroundImage: "url(../../images/banner/50-Banner.webp)"}}>
+        <div className="p-5 bg-primary bs-cover" style={{backgroundImage: "url(../../images/banner/fashions.webp)"}}>
           <div className="container text-center">
-            <span className="display-5 px-3 bg-white rounded shadow">Fashion</span>
+            {/* <span className="display-5 px-3 bg-white rounded shadow">Fashion</span> */}
           </div>
         </div>
         <Breadcrumb />

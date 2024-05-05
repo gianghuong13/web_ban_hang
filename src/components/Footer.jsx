@@ -1,3 +1,4 @@
+import { faAlignCenter } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -36,7 +37,7 @@ const Footer = () => {
       </div>
       <div className="container-fluid bg-dark text-white">
         <div className="row ">
-          <div className="col-md-3 py-3">
+          {/* <div className="col-md-3 py-3">
             <div className="h6">Company Name</div>
             <hr />
             <p>
@@ -137,21 +138,20 @@ const Footer = () => {
                 </Link>
               </li>
             </ul>
-          </div>
+          </div> */}
           <div className="col-md-3 py-3">
-            <div className="h6">Address</div>
-            <hr />
-            <address>
-              <strong>Twitter, Inc.</strong>
+            {/* <div className="h6">Address</div>
+            <hr /> */}
+            {/* <address>
+              <strong>Address</strong>
               <br />
               1355 Market St, Suite 900
               <br />
               San Francisco, CA 94103
               <br />
-              <abbr title="Phone">P:</abbr> (123) 456-7890
             </address>
-            <div className="h6">Customer Care</div>
-            <hr />
+            <hr /> */}
+            <div className="h6">Contact us</div>
             <i className="bi bi-telephone"></i> +1800 100 1000
             <br />
             <i className="bi bi-envelope"></i> info@email.com

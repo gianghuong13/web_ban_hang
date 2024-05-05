@@ -12,14 +12,7 @@ const SignInView = () => {
         <div className="col-md-6 bg-light bg-gradient p-3 d-none d-md-block">
           <Link to="/">
             <img
-              src="../../images/banner/Dell.webp"
-              alt="..."
-              className="img-fluid"
-            />
-          </Link>
-          <Link to="/">
-            <img
-              src="../../images/banner/Laptops.webp"
+              src="../../images/banner/si.webp"
               alt="..."
               className="img-fluid"
             />
