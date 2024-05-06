@@ -19,6 +19,7 @@ const CheckoutView = () => {
     province: '',
     address: ''
   });
+  const [orderSuccess, setOrderSuccess] = useState(false);
 
   useEffect(() => {
     axios.get('http://localhost:5000/account/user', { withCredentials: true })
@@ -87,12 +88,27 @@ const CheckoutView = () => {
         withCredentials: true
       })
       .then(response => {
-        console.log(response.data);
+        console.log('Address added successfully:', response.data);
       })
       .catch(error => {
         console.error(error);
       });
     }
+  
+    // Create the order regardless of whether a new address was added
+    axios.post(`http://localhost:5000/api/order/${userId}/add`, {
+      cart_id: userId // Replace cartId with the actual cart_id from your state
+    }, {
+      withCredentials: true
+    })
+    .then(response => {
+      console.log('Order created successfully:', response.data);
+      setOrderSuccess(true); // Set orderSuccess to true after successful submission
+      window.location.href = 'account/orders';
+    })
+    .catch(error => {
+      console.error(error);
+    });
   };
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -165,6 +181,9 @@ const CheckoutView = () => {
                       required
                     />
                   </div>
+                    {orderSuccess && <div className="alert alert-success" role="alert">
+                      Ordered successfully!
+                    </div>}
                   <div className="col-md-6">
                     <input
                       type="text"

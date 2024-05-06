@@ -378,37 +378,6 @@ mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Error connecting to MongoDB:', err));
 
-// Route to get categories from MongoDB
-app.get('/api/categories', (req, res) => {
-  // Implement logic to fetch categories from MongoDB
-});
-
-// Route to get products from MongoDB
-app.get('/api/products', (req, res) => {
-  // Implement logic to fetch products from MongoDB
-});
-
-// Route to get a single product from MongoDB
-app.get('/api/product/:id', async (req, res) => {
-  // Implement logic to fetch a single product from MongoDB
-});
-
-// Route to create a product in MongoDB
-app.post('/api/product', async (req, res) => {
-  // Implement logic to create a product in MongoDB
-});
-
-// Route to update a product in MongoDB
-app.put('/api/product/:id', async (req, res) => {
-  // Implement logic to update a product in MongoDB
-});
-
-// Route to delete a product from MongoDB
-app.delete('/api/product/:id', async (req, res) => {
-  // Implement logic to delete a product from MongoDB
-});
-
-// Route to get user cart from MySQL
 app.get('/api/cart/:userId', (req, res) => {
   const userId = req.params.userId;
   const query = 'SELECT * FROM carts WHERE cart_id = ?';
@@ -581,6 +550,41 @@ app.get('/cart/total/:cartId', (req, res) => {
         connection.release(); 
         if(err) throw err;
         res.send(results[0]);
+      });
+    });
+  });
+});
+
+app.post('/api/order/:userId/add', (req, res) => {
+  const userId = req.params.userId;
+  const { cart_id } = req.body;
+
+  const insertOrderQuery = 'INSERT INTO orders (user_id, status, orderDate, cart_id) VALUES (?, "Processing", NOW(), ?)';
+  db.query(insertOrderQuery, [userId, cart_id], (err, result) => {
+    if (err) {
+      console.error('Error creating order:', err);
+      return res.status(500).json({ error: 'Error creating order' });
+    }
+
+    const orderId = result.insertId;
+
+    const selectCartDetailsQuery = 'SELECT * FROM cartdetails WHERE cart_id = ?';
+    db.query(selectCartDetailsQuery, [cart_id], (err, cartDetails) => {
+      if (err) {
+        console.error('Error fetching cart details:', err);
+        return res.status(500).json({ error: 'Error fetching cart details' });
+      }
+      console.log(cartDetails); 
+      const insertOrderDetailsQuery = 'INSERT INTO orderdetails (order_id, product_id, priceEach, quantityOrdered, note) VALUES ?';
+      const orderDetailsData = cartDetails.map(detail => [orderId, detail.product_id, detail.priceEach, detail.quantity, detail.note]);
+
+      db.query(insertOrderDetailsQuery, [orderDetailsData], (err, result) => {
+        if (err) {
+          console.error('Error adding order details:', err);
+          return res.status(500).json({ error: 'Error adding order details' });
+        }
+
+        res.status(201).json({ message: 'Order and order details added successfully' });
       });
     });
   });
