@@ -5,10 +5,26 @@ import axios from 'axios';
 const CheckoutView = () => {
   const [cartData, setCartData] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [profileData, setProfileData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isNewAddress, setIsNewAddress] = useState(false);
+  const [userId, setUserId] = useState(null);
+  const [formData, setFormData] = useState({
+    email: '',
+    phone: '',
+    firstName: '',
+    lastName: '',
+    country: '',
+    city: '',
+    province: '',
+    address: ''
+  });
+
   useEffect(() => {
     axios.get('http://localhost:5000/account/user', { withCredentials: true })
       .then(response => {
         if (response.data.valid) {
+          setUserId(response.data.user_id);
           const userId = response.data.user_id;
 
           axios.get(`http://localhost:5000/api/user_cart/${userId}`)
@@ -17,7 +33,6 @@ const CheckoutView = () => {
                 return axios.get(`http://localhost:3001/api/product/${item.product_id}`)
                   .then(productResponse => {
                     item.productDetails = productResponse.data;
-                    console.log('Item:', item);
                     return item;
                   });
               });
@@ -32,18 +47,65 @@ const CheckoutView = () => {
             .then(response => {
               setTotalAmount(response.data.totalAmount);
             });
-        } else {
+            axios.get(`http://localhost:5000/api/checkout/${userId}`)
+            .then(response => {
+              console.log('Profile:', response.data);
+              setProfileData(response.data);
+              setIsLoading(false); // Set loading to false after fetching the data
+              // Initialize formData with profileData after profileData is fetched
+              setFormData({
+                email: response.data[0]?.email || '',
+                phone: response.data[0]?.phone || '',
+                firstName: response.data[0]?.first_name || '',
+                lastName: response.data[0]?.last_name || '',
+                country: response.data[0]?.country || '',
+                city: response.data[0]?.city || '',
+                province: response.data[0]?.province || '',
+                address: response.data[0]?.address || ''
+              });
+            });
+          } else {
+            window.location.href = '/account/signin';
+          }
+        })
+        .catch(err => {
           window.location.href = '/account/signin';
-        }
-      })
-      .catch(err => {
-        window.location.href = '/account/signin';
-      });
-  }, []);
+        });
+    }, []);
   const onSubmitApplyCouponCode = async (values) => {
     alert(JSON.stringify(values));
   };
+  const handleSubmit = (e) => {
+    if (isNewAddress) {
+      axios.post(`http://localhost:5000/account/${userId}/address`, {
+        country: formData.country,
+        province: formData.province,
+        city: formData.city,
+        address: formData.address,
+        primary: false // or false, depending on your requirements
+      }, {
+        withCredentials: true
+      })
+      .then(response => {
+        console.log(response.data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+    }
+  };
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+  if (isLoading) {
+    return <div>Loading...</div>; // Render a loading message while fetching the data
+  }
   return (
+    <form onSubmit={handleSubmit}>
     <div>
       <div className="bg-secondary border-top p-4 text-white mb-3">
         <h1 className="display-6">Checkout</h1>
@@ -56,25 +118,27 @@ const CheckoutView = () => {
                 <i className="bi bi-envelope"></i> Contact Info
               </div>
               <div className="card-body">
-                <div className="row g-3">
-                  <div className="col-md-6">
-                    <input
-                      type="email"
-                      className="form-control"
-                      placeholder="Email Address"
-                      aria-label="Email Address"
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <input
-                      type="tel"
-                      className="form-control"
-                      placeholder="Mobile no"
-                      aria-label="Mobile no"
-                    />
-                  </div>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <input
+                    type="email"
+                    className="form-control"
+                    placeholder="Email Address"
+                    aria-label="Email Address"
+                    defaultValue={profileData[0]?.email || 'not found'} // Use the email from profileData
+                  />
+                </div>
+                <div className="col-md-6">
+                  <input
+                    type="tel"
+                    className="form-control"
+                    placeholder="Mobile no"
+                    aria-label="Mobile no"
+                    defaultValue={profileData[0]?.phone || 'not found'} // Use the mobile from profileData
+                  />
                 </div>
               </div>
+            </div>
             </div>
 
             <div className="card mb-3">
@@ -87,112 +151,75 @@ const CheckoutView = () => {
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Name"
+                      placeholder="First Name"
+                      defaultValue={profileData[0]?.first_name || 'not found'}
                       required
                     />
                   </div>
-                  <div className="col-md-6">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Addresss"
-                      required
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Address 2 (Optional)"
-                    />
-                  </div>
-                  <div className="col-md-4">
-                    <select className="form-select" required>
-                      <option value>-- Country --</option>
-                      <option>United States</option>
-                    </select>
-                  </div>
-                  <div className="col-md-4">
-                    <select className="form-select" required>
-                      <option value>-- State --</option>
-                      <option>California</option>
-                    </select>
-                  </div>
-                  <div className="col-md-4">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Zip"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="card mb-3">
-              <div className="card-header">
-                <i className="bi bi-receipt"></i> Billing Infomation
-                <div className="form-check form-check-inline ms-3">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    defaultValue
-                    id="flexCheckDefault"
-                  />
-                  <label
-                    className="form-check-label"
-                    htmlFor="flexCheckDefault"
-                  >
-                    Same as Shipping Infomation
-                  </label>
-                </div>
-              </div>
-              <div className="card-body">
-                <div className="row g-3">
                   <div className="col-md-12">
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="Name"
+                      placeholder="Last Name"
+                      defaultValue={profileData[0]?.last_name || 'not found'}
                       required
                     />
                   </div>
                   <div className="col-md-6">
                     <input
                       type="text"
+                      name="country"
                       className="form-control"
-                      placeholder="Addresss"
+                      placeholder="Country"
+                      value={formData.country}
+                      onChange={handleInputChange}
                       required
                     />
                   </div>
-                  <div className="col-md-6">
-                    <input
+                  <div className="col-md-4">
+                  <input
                       type="text"
+                      name="city"
                       className="form-control"
-                      placeholder="Address 2 (Optional)"
-                    />
-                  </div>
-                  <div className="col-md-4">
-                    <select className="form-select" required>
-                      <option value>-- Country --</option>
-                      <option>United States</option>
-                    </select>
-                  </div>
-                  <div className="col-md-4">
-                    <select className="form-select" required>
-                      <option value>-- State --</option>
-                      <option>California</option>
-                    </select>
-                  </div>
-                  <div className="col-md-4">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Zip"
+                      placeholder="City"
+                      value={formData.city}
+                      onChange={handleInputChange}
                       required
                     />
                   </div>
+                  <div className="col-md-4">
+                  <input
+                      type="text"
+                      name="province"
+                      className="form-control"
+                      placeholder="Province"
+                      value={formData.province}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="col-md-4">
+                  <input
+                      type="text"
+                      name="address"
+                      className="form-control"
+                      placeholder="Address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="form-check">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    value={isNewAddress}
+                    onChange={e => setIsNewAddress(e.target.checked)}
+                  />
+                  <label className="form-check-label">
+                    Save as new address
+                  </label>
+                </div>
                 </div>
               </div>
             </div>
@@ -206,7 +233,7 @@ const CheckoutView = () => {
                   <div className="col-md-6">
                     <div className="form-check">
                       <input
-                        id="credit"
+                        id="cod"
                         name="paymentMethod"
                         type="radio"
                         className="form-check-input"
@@ -214,78 +241,15 @@ const CheckoutView = () => {
                         required
                       />
                       <label className="form-check-label" htmlFor="credit">
-                        Credit card
-                        <img
-                          src="../../images/payment/cards.webp"
-                          alt="..."
-                          className="ms-3"
-                          height={26}
-                        />
+                        COD
                       </label>
                     </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="form-check">
-                      <input
-                        id="paypal"
-                        name="paymentMethod"
-                        type="radio"
-                        className="form-check-input"
-                        required
-                      />
-                      <label className="form-check-label" htmlFor="paypal">
-                        PayPal
-                        <img
-                          src="../../images/payment/paypal_64.webp"
-                          alt="..."
-                          className="ms-3"
-                          height={26}
-                        />
-                      </label>
-                    </div>
-                  </div>
-                </div>
-                <div className="row g-3">
-                  <div className="col-md-6">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Name on card"
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <input
-                      type="number"
-                      className="form-control"
-                      placeholder="Card number"
-                    />
-                  </div>
-                  <div className="col-md-4">
-                    <input
-                      type="number"
-                      className="form-control"
-                      placeholder="Expiration month"
-                    />
-                  </div>
-                  <div className="col-md-4">
-                    <input
-                      type="number"
-                      className="form-control"
-                      placeholder="Expiration year"
-                    />
-                  </div>
-                  <div className="col-md-4">
-                    <input
-                      type="number"
-                      className="form-control"
-                      placeholder="CVV"
-                    />
                   </div>
                 </div>
               </div>
               <div className="card-footer border-info d-grid">
-                <button type="button" className="btn btn-info">
-                  Pay Now <strong>$162</strong>
+              <button type="submit" className="btn btn-info">
+                  Pay Now <strong>${totalAmount}</strong>
                 </button>
               </div>
             </div>
@@ -316,6 +280,7 @@ const CheckoutView = () => {
         </div>
       </div>
     </div>
+  </form>
   );
 };
 

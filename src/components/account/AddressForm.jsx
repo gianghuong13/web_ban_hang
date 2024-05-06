@@ -63,21 +63,6 @@ let AddressForm = (props) => {
         <i className="bi bi-geo-alt-fill" /> Address Detail
       </h6>
       <ul className="list-group list-group-flush">
-        {/* <li className="list-group-item">
-          <label>Country</label>
-          <CountryDropdown
-            value={country}
-            onChange={(val) => setCountry(val)}
-          />
-        </li>
-        <li className="list-group-item">
-          <label>Province</label>
-          <RegionDropdown
-            country={country}
-            value={province}
-            onChange={(val) => setProvince(val)}
-          />
-        </li> */}
     <li className="list-group-item">
           <label>Country</label>
           <Field

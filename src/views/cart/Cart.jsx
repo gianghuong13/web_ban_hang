@@ -25,12 +25,9 @@ const CartView = () => {
           const userId = response.data.user_id;
   
           axios.get(`http://localhost:5000/api/user_cart/${userId}`)
-            .then(response => {
-              console.log(`response.data in cart is: ${JSON.stringify(response.data)}`);
-  
+            .then(response => {  
               // Fetch details for each product in the cart
               const cartItems = response.data.map(item => {
-                console.log(`item.product_id in cart is: ${item.product_id}`);
                 return axios.get(`http://localhost:3001/api/product/${item.product_id}`)
                   .then(productResponse => {
                     // Add product details to the item

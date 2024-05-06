@@ -319,6 +319,19 @@ app.post('/account/:userId/address', async (req, res) => {
     return;
   }
 
+  const duplicateCheckQuery = 'SELECT * FROM address WHERE user_id = ? AND country = ? AND province = ? AND city = ? AND address = ?';
+  db.query(duplicateCheckQuery, [req.session.user_id, country, province, city, address], (err, results) => {
+    if (err) {
+      res.status(500).json({ message: err.toString() });
+      return;
+    }
+
+    // If the input is a duplicate, return an error message
+    if (results.length > 0) {
+      res.status(400).json({ message: 'This address already exists' });
+      return;
+    }
+    
   // If the new address is primary, check if there's already a primary address for the user
   if (primary) {
     const checkQuery = 'SELECT * FROM address WHERE user_id = ? AND `primary` = 1';
@@ -327,7 +340,8 @@ app.post('/account/:userId/address', async (req, res) => {
         res.status(500).json({ message: err.toString() });
         return;
       }
-
+      
+      
       // If there's already a primary address, update it to be non-primary
       if (results.length > 0) {
         const updateQuery = 'UPDATE address SET `primary` = 0 WHERE user_id = ? AND `primary` = 1';
@@ -349,6 +363,7 @@ app.post('/account/:userId/address', async (req, res) => {
     // Continue to insert the new address
     insertAddress(req, res, country, province, city, address, primary);
   }
+});
 });
 
 app.get('/api/categories', (req, res) => {
@@ -422,10 +437,7 @@ app.get('/api/cartdetails/:userId', (req, res) => {
 
 // Route to create user cart in MySQL
 app.post('/api/cart/:userId/add-item', async (req, res) => {
-  console.log(req.body);
-  console.log(req.params);
   const userId = req.params.userId;
-  console.log(`req.params.userId is: ${req.params.userId}`);
   const { productId, quantity, note } = req.body;
 
   try {
