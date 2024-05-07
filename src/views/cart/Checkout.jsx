@@ -116,6 +116,7 @@ const CheckoutView = () => {
     
     // Check if the address entered by the user is different from the default address
     if (
+      formData.address_id === "new" &&
       defaultAddress &&
       (formData.address !== defaultAddress.address ||
       formData.city !== defaultAddress.city ||
@@ -136,6 +137,9 @@ const CheckoutView = () => {
         addressToUse = response.data;
       } catch (error) {
         console.error(error);
+        if (error.response && error.response.status === 400) {
+          alert('This address already exists');
+        }
         return; // Stop further execution if an error occurs
       }
     }
@@ -154,7 +158,7 @@ const CheckoutView = () => {
       });
       console.log('Order created successfully:', response.data);
       setOrderSuccess(true); // Set orderSuccess to true after successful submission
-      // window.location.href = 'account/orders';
+      window.location.href = 'account/orders';
     } catch (error) {
       console.error(error);
     }

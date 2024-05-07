@@ -543,8 +543,8 @@ app.get('/api/checkout/:userId', (req, res) => {
   const query = `SELECT * FROM user_profile_view WHERE user_id = ?`;
   db.query(query, [userId], (error, results, fields) => {
     if (error) {
-      console.error('Error fetching user cart data:', error);
-      res.status(500).json({ error: 'Error fetching user cart data' });
+      console.error('Error fetching user profile data:', error);
+      res.status(500).json({ error: 'Error fetching user profile data' });
     } else {
       res.json(results);
     }
@@ -581,6 +581,20 @@ app.get('/cart/total/:cartId', (req, res) => {
     });
   });
 });
+
+app.get('/api/order/:userId', (req, res) => {
+  const userId = req.params.userId;
+  const query = `SELECT * FROM user_orders_view WHERE user_id = ?`;
+  db.query(query, [userId], (error, results, fields) => {
+    if (error) {
+      console.error('Error fetching orders data:', error);
+      res.status(500).json({ error: 'Error fetching orders data' });
+    } else {
+      res.json(results);
+    }
+  });
+});
+
 
 app.post('/api/order/:userId/add', (req, res) => {
   const userId = req.params.userId;
