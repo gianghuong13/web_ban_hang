@@ -7,8 +7,9 @@ const CheckoutView = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [profileData, setProfileData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isNewAddress, setIsNewAddress] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [defaultAddress, setDefaultAddress] = useState(null);
+  const [addresses, setAddresses] = useState([]); // State to hold addresses
   const [formData, setFormData] = useState({
     email: '',
     phone: '',
@@ -17,7 +18,8 @@ const CheckoutView = () => {
     country: '',
     city: '',
     province: '',
-    address: ''
+    address: '',
+    address_id: ''
   });
   const [orderSuccess, setOrderSuccess] = useState(false);
 
@@ -25,9 +27,8 @@ const CheckoutView = () => {
     axios.get('http://localhost:5000/account/user', { withCredentials: true })
       .then(response => {
         if (response.data.valid) {
-          setUserId(response.data.user_id);
           const userId = response.data.user_id;
-
+          setUserId(userId);
           axios.get(`http://localhost:5000/api/user_cart/${userId}`)
             .then(response => {
               const cartItems = response.data.map(item => {
@@ -44,72 +45,62 @@ const CheckoutView = () => {
                 });
             });
 
+          axios.get(`http://localhost:5000/account/${userId}/address/default`, { withCredentials: true })
+            .then(response => {
+              setDefaultAddress(response.data);
+            })
+            .catch(error => {
+              console.error(error);
+            });
+
           axios.get(`http://localhost:5000/cart/total/${userId}`)
             .then(response => {
               setTotalAmount(response.data.totalAmount);
             });
-            axios.get(`http://localhost:5000/api/checkout/${userId}`)
+
+          axios.get(`http://localhost:5000/account/${userId}/addresses`, { withCredentials: true }) // Fetch addresses
+            .then(response => {
+              setAddresses(response.data);
+            })
+            .catch(error => {
+              console.error(error);
+            });
+            setTimeout(() => {
+              setIsLoading(false);
+            }, 1000);
+          axios.get(`http://localhost:5000/api/checkout/${userId}`)
             .then(response => {
               console.log('Profile:', response.data);
               setProfileData(response.data);
-              setIsLoading(false); // Set loading to false after fetching the data
-              // Initialize formData with profileData after profileData is fetched
+              setIsLoading(false);
               setFormData({
                 email: response.data[0]?.email || '',
                 phone: response.data[0]?.phone || '',
                 firstName: response.data[0]?.first_name || '',
                 lastName: response.data[0]?.last_name || '',
-                country: response.data[0]?.country || '',
-                city: response.data[0]?.city || '',
-                province: response.data[0]?.province || '',
-                address: response.data[0]?.address || ''
               });
             });
-          } else {
-            window.location.href = '/account/signin';
-          }
-        })
-        .catch(err => {
+        } else {
           window.location.href = '/account/signin';
-        });
-    }, []);
-  const onSubmitApplyCouponCode = async (values) => {
-    alert(JSON.stringify(values));
-  };
-  const handleSubmit = (e) => {
-    if (isNewAddress) {
-      axios.post(`http://localhost:5000/account/${userId}/address`, {
-        country: formData.country,
-        province: formData.province,
-        city: formData.city,
-        address: formData.address,
-        primary: false // or false, depending on your requirements
-      }, {
-        withCredentials: true
+        }
       })
-      .then(response => {
-        console.log('Address added successfully:', response.data);
-      })
-      .catch(error => {
-        console.error(error);
+      .catch(err => {
+        window.location.href = '/account/signin';
       });
-    }
-  
-    // Create the order regardless of whether a new address was added
-    axios.post(`http://localhost:5000/api/order/${userId}/add`, {
-      cart_id: userId // Replace cartId with the actual cart_id from your state
-    }, {
-      withCredentials: true
-    })
-    .then(response => {
-      console.log('Order created successfully:', response.data);
-      setOrderSuccess(true); // Set orderSuccess to true after successful submission
-      window.location.href = 'account/orders';
-    })
-    .catch(error => {
-      console.error(error);
+  }, []);
+
+  const handleAddressChange = (addressId) => {
+    const selectedAddress = addresses.find(address => address.address_id === addressId);
+    setFormData({
+      ...formData,
+      country: selectedAddress.country,
+      city: selectedAddress.city,
+      province: selectedAddress.province,
+      address: selectedAddress.address,
+      address_id: selectedAddress.address_id
     });
   };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -117,6 +108,58 @@ const CheckoutView = () => {
       [name]: value
     });
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    let addressToUse = formData; // Initialize with the form data
+    
+    // Check if the address entered by the user is different from the default address
+    if (
+      defaultAddress &&
+      (formData.address !== defaultAddress.address ||
+      formData.city !== defaultAddress.city ||
+      formData.province !== defaultAddress.province ||
+      formData.country !== defaultAddress.country)
+    ) {
+      try {
+        const response = await axios.post(`http://localhost:5000/account/${userId}/address`, {
+          country: formData.country,
+          province: formData.province,
+          city: formData.city,
+          address: formData.address,
+          primary: true // or false, depending on your requirements
+        }, {
+          withCredentials: true
+        });
+        console.log('Address added successfully:', response.data);
+        addressToUse = response.data;
+      } catch (error) {
+        console.error(error);
+        return; // Stop further execution if an error occurs
+      }
+    }
+  
+    console.log('Request data:', {
+      cart_id: userId, // Replace cartId with the actual cart_id from your state
+      address_id: addressToUse?.address_id || '' // Use address_id if available, otherwise use an empty string
+    });
+  
+    try {
+      const response = await axios.post(`http://localhost:5000/api/order/${userId}/add`, {
+        cart_id: userId, // Replace cartId with the actual cart_id from your state
+        address_id: addressToUse?.address_id || '' // Use addressToUse's address_id if available, otherwise use an empty string
+      }, {
+        withCredentials: true
+      });
+      console.log('Order created successfully:', response.data);
+      setOrderSuccess(true); // Set orderSuccess to true after successful submission
+      // window.location.href = 'account/orders';
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  
   if (isLoading) {
     return <div>Loading...</div>; // Render a loading message while fetching the data
   }
@@ -153,17 +196,7 @@ const CheckoutView = () => {
                     defaultValue={profileData[0]?.phone || 'not found'} // Use the mobile from profileData
                   />
                 </div>
-              </div>
-            </div>
-            </div>
-
-            <div className="card mb-3">
-              <div className="card-header">
-                <i className="bi bi-truck"></i> Shipping Infomation
-              </div>
-              <div className="card-body">
-                <div className="row g-3">
-                  <div className="col-md-12">
+                <div className="col-md-12">
                     <input
                       type="text"
                       className="form-control"
@@ -181,67 +214,102 @@ const CheckoutView = () => {
                       required
                     />
                   </div>
-                    {orderSuccess && <div className="alert alert-success" role="alert">
-                      Ordered successfully!
-                    </div>}
-                  <div className="col-md-6">
-                    <input
-                      type="text"
-                      name="country"
-                      className="form-control"
-                      placeholder="Country"
-                      value={formData.country}
-                      onChange={handleInputChange}
-                      required
-                    />
+              </div>
+            </div>
+            </div>
+                <div className="card mb-3">
+            <div className="card-header">
+              <i className="bi bi-truck"></i> Shipping Information
+            </div>
+            <div className="card-body">
+              <div className="row g-3">
+                {/* Render radio buttons for addresses */}
+                {addresses.map(address => (
+                  <div key={address.address_id} className="col-md-12">
+                    <div className="form-check">
+                      <input
+                        type="radio"
+                        id={`address-${address.address_id}`}
+                        name="address_id"
+                        className="form-check-input"
+                        value={address.address_id}
+                        checked={formData.address_id === address.address_id}
+                        onChange={() => handleAddressChange(address.address_id)}
+                      />
+                      <label className="form-check-label" htmlFor={`address-${address.address_id}`}>
+                        {`${address.address}, ${address.province}, ${address.city}, ${address.country}`}
+                      </label>
+                    </div>
                   </div>
-                  <div className="col-md-4">
-                  <input
-                      type="text"
-                      name="city"
-                      className="form-control"
-                      placeholder="City"
-                      value={formData.city}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  <div className="col-md-4">
-                  <input
-                      type="text"
-                      name="province"
-                      className="form-control"
-                      placeholder="Province"
-                      value={formData.province}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  <div className="col-md-4">
-                  <input
-                      type="text"
-                      name="address"
-                      className="form-control"
-                      placeholder="Address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
+                ))}
+                {/* Radio button for creating a new address */}
+                <div className="col-md-12">
                   <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    value={isNewAddress}
-                    onChange={e => setIsNewAddress(e.target.checked)}
-                  />
-                  <label className="form-check-label">
-                    Save as new address
-                  </label>
-                </div>
+                    <input
+                      type="radio"
+                      id="new-address"
+                      name="address_id"
+                      className="form-check-input"
+                      value="new"
+                      checked={formData.address_id === "new"}
+                      onChange={() => setFormData({ ...formData, address_id: "new" })}
+                    />
+                    <label className="form-check-label" htmlFor="new-address">
+                      Add New Address
+                    </label>
+                    {formData.address_id === "new" && (
+                      <div className="row g-3">
+                        <div className="col-md-12">
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Country"
+                            name="country"
+                            value={formData.country}
+                            onChange={handleInputChange}
+                            required
+                          />
+                        </div>
+                        <div className="col-md-12">
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="City"
+                            name="city"
+                            value={formData.city}
+                            onChange={handleInputChange}
+                            required
+                          />
+                        </div>
+                        <div className="col-md-12">
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Province"
+                            name="province"
+                            value={formData.province}
+                            onChange={handleInputChange}
+                            required
+                          />
+                        </div>
+                        <div className="col-md-12">
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Address"
+                            name="address"
+                            value={formData.address}
+                            onChange={handleInputChange}
+                            required
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
 
             <div className="card mb-3 border-info">
               <div className="card-header bg-info">

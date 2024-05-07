@@ -276,17 +276,19 @@ app.get('/account/signout', (req, res) => {
   });
 });
 
-function insertAddress(req, res, country, province, city, address, primary) {
-  const query = 'INSERT INTO address (user_id, country, province, city, address, `primary`) VALUES (?, ?, ?, ?, ?, ?)';
-  db.query(query, [req.session.user_id, country, province, city, address, primary ? 1 : 0], (err, results) => {
+app.get('/account/:userId/address/default', (req, res) => {
+  const userId = req.params.userId;
+  const query = 'SELECT * FROM address WHERE user_id = ? AND `primary` = 1';
+  db.query(query, [userId], (err, results) => {
     if (err) {
-      res.status(500).json({ message: err.toString() });
-      return;
+      console.error('Error fetching user cart:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else {
+      res.status(200).json(results[0]);
     }
-
-    res.status(200).json({ message: 'Address added successfully' });
   });
-}
+});
+
 
 app.put('/account/profile', async (req, res) => {
   console.log('PUT /account/profile called');
@@ -303,6 +305,31 @@ app.put('/account/profile', async (req, res) => {
     }
   });
 });
+
+app.get('/account/:userId/addresses', (req, res) => {
+  const userId = req.params.userId;
+  const query = 'SELECT * FROM address WHERE user_id = ?';
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching user cart:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else {
+      res.status(200).json(results);
+    }
+  });
+});
+
+function insertAddress(req, res, country, province, city, address, primary) {
+  const query = 'INSERT INTO address (user_id, country, province, city, address, `primary`) VALUES (?, ?, ?, ?, ?, ?)';
+  db.query(query, [req.session.user_id, country, province, city, address, primary ? 1 : 0], (err, results) => {
+    if (err) {
+      res.status(500).json({ message: err.toString() });
+      return;
+    }
+    const address_id = results.insertId;
+    res.status(201).json({ address_id, country, province, city, address, primary });
+  });
+}
 
 app.post('/account/:userId/address', async (req, res) => {
   if (!req.session.user_id) {
@@ -557,10 +584,14 @@ app.get('/cart/total/:cartId', (req, res) => {
 
 app.post('/api/order/:userId/add', (req, res) => {
   const userId = req.params.userId;
-  const { cart_id } = req.body;
+  const { cart_id, address_id } = req.body;
 
-  const insertOrderQuery = 'INSERT INTO orders (user_id, status, orderDate, cart_id) VALUES (?, "Processing", NOW(), ?)';
-  db.query(insertOrderQuery, [userId, cart_id], (err, result) => {
+  if (!address_id) {
+    return res.status(400).json({ error: 'address_id is required' });
+  }
+  
+  const insertOrderQuery = 'INSERT INTO orders (user_id, status, orderDate, cart_id, address_id) VALUES (?, "Processing", NOW(), ?, ?)';
+  db.query(insertOrderQuery, [userId, cart_id, address_id], (err, result) => {
     if (err) {
       console.error('Error creating order:', err);
       return res.status(500).json({ error: 'Error creating order' });
