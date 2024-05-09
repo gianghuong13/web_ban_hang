@@ -1,6 +1,14 @@
 import React from "react";
 
-const FilterPrice = (props) => {
+const FilterPrice = ({ onPriceChange }) => {
+
+  const handleCheckboxChange = (event) => {
+    const [minPrice, maxPrice] = event.target.value.split('-').map(price => parseFloat(price));
+    onPriceChange(minPrice, maxPrice);
+  };
+
+
+
   return (
     <div className="card mb-3">
       <div
@@ -19,9 +27,11 @@ const FilterPrice = (props) => {
               className="form-check-input"
               type="checkbox"
               id="flexCheckDefault1"
+              value="1-25"
+              onChange={handleCheckboxChange}
             />
             <label className="form-check-label" htmlFor="flexCheckDefault1">
-              $24.00 - $29.00 <span className="text-muted">(4)</span>
+              $1.00 - $25.00 <span className="text-muted">(4)</span>
             </label>
           </div>
         </li>
@@ -31,9 +41,11 @@ const FilterPrice = (props) => {
               className="form-check-input"
               type="checkbox"
               id="flexCheckDefault2"
+              value="26-50"
+              onChange={handleCheckboxChange}
             />
             <label className="form-check-label" htmlFor="flexCheckDefault2">
-              $33.00 - $35.00 <span className="text-muted">(2)</span>
+              $26.00 - $50.00 <span className="text-muted">(2)</span>
             </label>
           </div>
         </li>
@@ -43,9 +55,11 @@ const FilterPrice = (props) => {
               className="form-check-input"
               type="checkbox"
               id="flexCheckDefault3"
+              value="51-99"
+              onChange={handleCheckboxChange}
             />
             <label className="form-check-label" htmlFor="flexCheckDefault3">
-              $70.00 - $99.00 <span className="text-muted">(5)</span>
+              $51.00 - $99.00 <span className="text-muted">(5)</span>
             </label>
           </div>
         </li>
