@@ -33,8 +33,8 @@ const FilterCategory = () => {
       >
         {categories.map((category, index) => (
           <li key={index} className="list-group-item">
-            <Link to="/" className="text-decoration-none stretched-link">
-              {category}
+            <Link to={`/category/${category.id}`} className="text-decoration-none stretched-link">
+              {category.name}
             </Link>
           </li>
         ))}

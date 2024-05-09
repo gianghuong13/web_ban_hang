@@ -22,18 +22,22 @@ mongoose.connect(url)
     });
 
     // get categories
-    mongoose.connection.db.collection('categories').find({}, { projection: { _id: 0, name: 1 } }).toArray()
+    mongoose.connection.db.collection('categories').find({}, { projection: { _id: 1, name: 1 } }).toArray()
       .then(data => {
-        categories = data.map(category => category.name); // Store the category names
+        categories = data.map(category => ({
+          id: category._id ? category._id.toString() : null,
+          name: category.name
+      })); // Store the category names
         console.log(categories); // Log the category names to the console
       })
       .catch(err => console.error('Error fetching data', err));
 
     // get products
-    mongoose.connection.db.collection('products').find({}, { projection: { _id: 1, name: 1, description: 1, img: 1, price: 1 } }).toArray()
+    mongoose.connection.db.collection('products').find({}, { projection: { _id: 1, name: 1, description: 1, img: 1, price: 1, category_id: 1 } }).toArray()
     .then(data => {
       products = data.map(product => ({
-        id: product._id ? product._id.toString() : null, // Check if _id exists before converting to string
+        id: product._id ? product._id.toString() : null, // check if exists then convert to string
+        category_id: product.category_id ? product.category_id.toString() : null,
         name: product.name,
         description: product.description,
         img: product.img,
@@ -52,6 +56,12 @@ app.get('/api/categories', (req, res) => {
 
 app.get('/api/products', (req, res) => {
   res.json(products);
+});
+
+app.get('/api/products', (req, res) => {
+  const { category_id } = req.query;
+  const filteredProducts = products.filter(product => product.category_id === category_id);
+  res.json(filteredProducts);
 });
 
 app.get(`/api/product/:id`, async (req, res) => {
