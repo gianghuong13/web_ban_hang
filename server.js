@@ -393,6 +393,55 @@ app.post('/account/:userId/address', async (req, res) => {
 });
 });
 
+app.put('/account/:userId/address/:addressId/primary', (req, res) => {
+  if (!req.session.user_id) {
+    // No user is logged in, return an error message
+    res.status(401).json({ valid: false, message: 'Not authenticated' });
+    return;
+  }
+
+  const userId = req.params.userId;
+  const addressId = req.params.addressId;
+
+  // First, set any primary address to non-primary
+  const updateQuery = 'UPDATE address SET `primary` = 0 WHERE user_id = ? AND `primary` = 1';
+  db.query(updateQuery, [userId], (err, results) => {
+    if (err) {
+      res.status(500).json({ message: err.toString() });
+      return;
+    }
+
+    // Then, set the selected address to primary
+    const setPrimaryQuery = 'UPDATE address SET `primary` = 1 WHERE user_id = ? AND address_id = ?';
+    db.query(setPrimaryQuery, [userId, addressId], (err, results) => {
+      if (err) {
+        res.status(500).json({ message: err.toString() });
+        return;
+      }
+
+      if (results.affectedRows === 0) {
+        res.status(404).json({ message: 'Address not found' });
+      } else {
+        res.status(200).json({ message: 'Address updated successfully' });
+      }
+    });
+  });
+});
+
+app.delete('/account/address/remove/:addressId', (req, res) => {
+  const addressId = req.params.addressId;
+  const deleteQuery = 'DELETE FROM address WHERE address_id = ?';
+  db.query(deleteQuery, [addressId], (err, result) => {
+    if (err) {
+      console.error('Error deleting address:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else {
+      res.status(200).json({ message: 'Address removed successfully' });
+    }
+  });
+});
+
+
 app.get('/api/categories', (req, res) => {
   res.json(categories);
 });
