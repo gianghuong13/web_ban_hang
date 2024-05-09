@@ -23,17 +23,13 @@ const ProductListView = () => {
   const [view, setView] = useState("list");
   const { categoryId } = useParams();
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const products = allProducts;
+  const [minPrice, setMinPrice] = useState(null);
+  const [maxPrice, setMaxPrice] = useState(null);
 
-
-  const filterProductsByPrice = (minPrice, maxPrice) => {
-    setFilteredProducts(
-      products.filter(product =>
-        product.price.price >= minPrice && product.price.price <= maxPrice
-      )
-    );
+  const handlePriceChange = (min, max) => {
+    setMinPrice(min);
+    setMaxPrice(max);
   };
-
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -55,12 +51,13 @@ const ProductListView = () => {
     if (categoryId) {
       filteredProducts = allProducts.filter(product => product.category_id === categoryId);
     }
+    if (minPrice !== null && maxPrice !== null) {
+      filteredProducts = filteredProducts.filter(product =>
+        product.price.price >= minPrice && product.price.price <= maxPrice
+      );
+    }
     setCurrentProducts(filteredProducts);
-  }, [allProducts, categoryId]);
-
-  useEffect(() => {
-    setCurrentProducts(filteredProducts);
-  }, [filteredProducts]);
+  }, [allProducts, categoryId, minPrice, maxPrice]);
 
     return (
       <React.Fragment>
@@ -74,7 +71,7 @@ const ProductListView = () => {
           <div className="row">
             <div className="col-md-3">
               <FilterCategory />
-              <FilterPrice onPriceChange={filterProductsByPrice} />
+              <FilterPrice onPriceChange={handlePriceChange} />
               <FilterSize />
               <FilterStar />
               <FilterColor />
