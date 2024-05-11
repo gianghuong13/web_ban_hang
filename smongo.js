@@ -28,7 +28,7 @@ mongoose.connect(url)
           id: category._id ? category._id.toString() : null,
           name: category.name
       })); // Store the category names
-        console.log(categories); // Log the category names to the console
+        // console.log(categories); // Log the category names to the console
       })
       .catch(err => console.error('Error fetching data', err));
 
@@ -43,7 +43,7 @@ mongoose.connect(url)
         img: product.img,
         price: product.price // Add the price field
       }));
-      console.log(products); // Log the product names, descriptions, images, and prices to the console
+      // console.log(products); // Log the product names, descriptions, images, and prices to the console
     })
     .catch(err => console.error('Error fetching products', err));
 
