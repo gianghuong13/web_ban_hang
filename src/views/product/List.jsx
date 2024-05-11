@@ -17,7 +17,7 @@ import CardProductList from "../../components/card/CardProductList";
 const ProductListView = () => {
   const [allProducts, setAllProducts] = useState([]);
   const [currentProducts, setCurrentProducts] = useState([]);
-  const [currentPage, setCurrentPage] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(null);
   const [totalItems, setTotalItems] = useState(0);
   const [view, setView] = useState("list");
@@ -25,39 +25,50 @@ const ProductListView = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [minPrice, setMinPrice] = useState(null);
   const [maxPrice, setMaxPrice] = useState(null);
+  const pageLimit = 9;
 
   const handlePriceChange = (min, max) => {
     setMinPrice(min);
     setMaxPrice(max);
   };
 
+  // Fetch products from the API
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3001/api/products`);
+      const products = response.data;
+      setAllProducts(products);
+      // Assuming the first page is being fetched initially
+      setCurrentProducts(products.slice(0, pageLimit));
+      setTotalItems(products.length);
+      setTotalPages(Math.ceil(products.length / pageLimit));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get(`http://localhost:3001/api/products`);
-        const products = response.data;
-        setAllProducts(products);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-  
     fetchProducts();
-  }, []);
+  }, [])
 
 
   useEffect(() => {
-    let filteredProducts = allProducts;
-    if (categoryId) {
-      filteredProducts = allProducts.filter(product => product.category_id === categoryId);
+    // Apply filters and slice for pagination only if allProducts is not empty
+    if (allProducts.length > 0) {
+      let filteredProducts = allProducts;
+      if (categoryId) {
+        filteredProducts = filteredProducts.filter(product => product.category_id === categoryId);
+      }
+      if (minPrice !== null && maxPrice !== null) {
+        filteredProducts = filteredProducts.filter(product =>
+          product.price.price >= minPrice && product.price.price <= maxPrice
+        );
+      }
+      const start = (currentPage - 1) * pageLimit;
+      const end = start + pageLimit;
+      setCurrentProducts(filteredProducts.slice(start, end));
     }
-    if (minPrice !== null && maxPrice !== null) {
-      filteredProducts = filteredProducts.filter(product =>
-        product.price.price >= minPrice && product.price.price <= maxPrice
-      );
-    }
-    setCurrentProducts(filteredProducts);
-  }, [allProducts, categoryId, minPrice, maxPrice]);
+  }, [allProducts, categoryId, minPrice, maxPrice, currentPage]);
 
     return (
       <React.Fragment>
@@ -84,7 +95,7 @@ const ProductListView = () => {
                 <div className="col-7">
                   <span className="align-middle fw-bold">
                     {totalItems} results for{" "}
-                    <span className="text-warning">"t-shirts"</span>
+                    <span className="text-warning">"products"</span>
                   </span>
                 </div>
                 <div className="col-5 d-flex justify-content-end">
@@ -146,6 +157,7 @@ const ProductListView = () => {
                 pageNeighbours={3}
                 sizing=""
                 alignment="justify-content-center"
+                onPageChanged={(data) => setCurrentPage(data.currentPage)}
               />
             </div>
           </div>
