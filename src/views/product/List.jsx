@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import Paging from "../../components/Paging";
@@ -13,11 +13,11 @@ import FilterTag from "../../components/filter/Tag";
 import CardServices from "../../components/card/CardServices";
 import CardProductGrid from "../../components/card/CardProductGrid";
 import CardProductList from "../../components/card/CardProductList";
+import ReactPaginate from 'react-paginate';
 
 const ProductListView = () => {
   const [allProducts, setAllProducts] = useState([]);
   const [currentProducts, setCurrentProducts] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(null);
   const [totalItems, setTotalItems] = useState(0);
   const [view, setView] = useState("list");
@@ -25,50 +25,47 @@ const ProductListView = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [minPrice, setMinPrice] = useState(null);
   const [maxPrice, setMaxPrice] = useState(null);
-  const pageLimit = 9;
+  const [data, setData] = useState([]);
+  const [limit,setLimit]=useState(5);
+  const [pageCount,setPageCount]=useState(1);
+  const currentPage=useRef();
 
   const handlePriceChange = (min, max) => {
     setMinPrice(min);
     setMaxPrice(max);
   };
 
-  // Fetch products from the API
-  const fetchProducts = async () => {
-    try {
-      const response = await axios.get(`http://localhost:3001/api/products`);
-      const products = response.data;
-      setAllProducts(products);
-      // Assuming the first page is being fetched initially
-      setCurrentProducts(products.slice(0, pageLimit));
-      setTotalItems(products.length);
-      setTotalPages(Math.ceil(products.length / pageLimit));
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
+  
   useEffect(() => {
-    fetchProducts();
-  }, [])
+    currentPage.current=1;
+    // getAllUser();
+    getPaginatedProducts();
+  }, []);
 
+  function getPaginatedProducts(){
+    fetch(`http://localhost:3001/api/pagedproducts?page=${currentPage.current}&limit=${limit}`, {
+      method: "GET",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data, "Products");
+        setPageCount(data.pageCount);
+        setCurrentProducts(data.result); // set the fetched products to currentProducts
+      });
+  }
 
-  useEffect(() => {
-    // Apply filters and slice for pagination only if allProducts is not empty
-    if (allProducts.length > 0) {
-      let filteredProducts = allProducts;
-      if (categoryId) {
-        filteredProducts = filteredProducts.filter(product => product.category_id === categoryId);
-      }
-      if (minPrice !== null && maxPrice !== null) {
-        filteredProducts = filteredProducts.filter(product =>
-          product.price.price >= minPrice && product.price.price <= maxPrice
-        );
-      }
-      const start = (currentPage - 1) * pageLimit;
-      const end = start + pageLimit;
-      setCurrentProducts(filteredProducts.slice(start, end));
-    }
-  }, [allProducts, categoryId, minPrice, maxPrice, currentPage]);
+  
+
+  function handlePageClick(e) {
+    console.log(e);
+   currentPage.current=e.selected+1;
+   getPaginatedProducts();
+  }
+  
+  function changeLimit(){
+    currentPage.current=1;
+    getPaginatedProducts();
+  }
 
     return (
       <React.Fragment>
@@ -151,14 +148,27 @@ const ProductListView = () => {
                     })}
               </div>
               <hr />
-              <Paging
-                totalRecords={totalItems}
-                pageLimit={9}
-                pageNeighbours={3}
-                sizing=""
-                alignment="justify-content-center"
-                onPageChanged={(data) => setCurrentPage(data.currentPage)}
-              />
+              <ReactPaginate
+          breakLabel="..."
+          nextLabel="next >"
+          onPageChange={handlePageClick}
+          pageRangeDisplayed={5}
+          pageCount={pageCount}
+          previousLabel="< previous"
+          renderOnZeroPageCount={null}
+          marginPagesDisplayed={2}
+          containerClassName="pagination justify-content-center"
+          pageClassName="page-item"
+          pageLinkClassName="page-link"
+          previousClassName="page-item"
+          previousLinkClassName="page-link"
+          nextClassName="page-item"
+          nextLinkClassName="page-link"
+          activeClassName="active"
+          forcePage={currentPage.current-1}
+        />
+        <input placeholder="Limit" onChange={e=>setLimit(e.target.value)}/>
+        <button onClick={changeLimit}>Set Limit</button>
             </div>
           </div>
         </div>
