@@ -1,0 +1,14 @@
+version: '3'
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=mongodb://db:27017/things
+  db:
+    image: mongo:4.4
+    ports:
+      - "5001:27017"
