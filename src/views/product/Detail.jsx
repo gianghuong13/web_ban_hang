@@ -3,6 +3,7 @@ import { data } from "../../data";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from 'axios';
+import { set } from "mongoose";
 
 const CardFeaturedProduct = lazy(() =>
   import("../../components/card/CardFeaturedProduct")
@@ -31,6 +32,7 @@ const ProductDetailView = () => {
   const [colors, setColors] = useState([]);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
+  const [imgLink, setImgLink] = useState('');
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -42,6 +44,8 @@ const ProductDetailView = () => {
         console.log('Product ID:', response.data._id);
         setSizes(response.data.sizes);
         setColors(response.data.colors);
+        setImgLink(response.data.img);
+        console.log('Img:', response.data.img);
         console.log('Sizes:', response.data.sizes);
         console.log('Colors:', response.data.colors);
       } catch (error) {
@@ -98,16 +102,10 @@ const addToCart = () => {
           <div className="row mb-3">
             <div className="col-md-5 text-center">
               <img
-                src= {product ? product.img : 'Loading...'}
+                src= {product ? product.img : imgLink}
                 className="img-fluid mb-3"
-                alt=""
+                alt={product?.name}
               />
-                <img
-                  src={product ? product.image : "../../images/default.jpg"}
-                  className="border border-secondary me-2"
-                  width="75"
-                  alt="..."
-                />
             </div>
             <div className="col-md-7">
             <h1 className="h5 d-inline me-2">{product ? product.name : 'Loading...'}</h1>
