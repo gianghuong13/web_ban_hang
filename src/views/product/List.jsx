@@ -55,23 +55,18 @@ const ProductListView = () => {
   useEffect(() => {
     // Apply filters and slice for pagination only if allProducts is not empty
     if (allProducts.length > 0) {
-      let filtered = allProducts;
+      let filteredProducts = allProducts;
       if (categoryId) {
-        filtered = filtered.filter(product => product.category_id === categoryId);
+        filteredProducts = filteredProducts.filter(product => product.category_id === categoryId);
       }
       if (minPrice !== null && maxPrice !== null) {
-        filtered = filtered.filter(product =>
+        filteredProducts = filteredProducts.filter(product =>
           product.price.price >= minPrice && product.price.price <= maxPrice
         );
       }
-      setFilteredProducts(filtered); // Set the filtered products state
-      const totalItemsCount = filtered.length;
-      setTotalItems(totalItemsCount); // Update total items state
-      setTotalPages(Math.ceil(totalItemsCount / pageLimit)); // Update total pages state
-  
       const start = (currentPage - 1) * pageLimit;
       const end = start + pageLimit;
-      setCurrentProducts(filtered.slice(start, end)); // Update current products state
+      setCurrentProducts(filteredProducts.slice(start, end));
     }
   }, [allProducts, categoryId, minPrice, maxPrice, currentPage]);
 

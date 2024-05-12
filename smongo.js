@@ -81,6 +81,32 @@ app.get('/api/products', (req, res) => {
   res.json(products);
 });
 
+app.get('/api/pagedproducts', async (req, res) => {
+  const allProducts = await ProductModel.find({});
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
+
+  const startIndex = (page - 1) * limit;
+  const lastIndex = page * limit;
+
+  const results = {};
+  results.totalProducts = allProducts.length;
+  results.pageCount = Math.ceil(allProducts.length / limit);
+
+  if (lastIndex < allProducts.length) {
+    results.next = {
+      page: page + 1,
+    };
+  }
+  if (startIndex > 0) {
+    results.prev = {
+      page: page - 1,
+    };
+  }
+  results.result = allProducts.slice(startIndex, lastIndex);
+  res.json(results);
+});
+
 
 app.get(`/api/product/:id`, async (req, res) => {
   const { id } = req.params;

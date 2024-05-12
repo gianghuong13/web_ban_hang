@@ -20,7 +20,7 @@ class Paging extends Component {
   constructor(props) {
     super();
     const {
-      totalRecords = 0,
+      totalRecords = 0, 
       pageLimit = 30,
       pageNeighbours = 0,
       sizing = "",
