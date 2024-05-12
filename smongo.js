@@ -33,17 +33,40 @@ mongoose.connect(url)
       .catch(err => console.error('Error fetching data', err));
 
     // get products
-    mongoose.connection.db.collection('products').find({}, { projection: { _id: 1, name: 1, description: 1, img: 1, price: 1, category_id: 1 } }).toArray()
+    mongoose.connection.db.collection('products').find({}, {
+      projection: {
+        _id: 1,
+        name: 1,
+        description: 1,
+        img: 1,
+        price: 1,
+        category_id: 1,
+        available: 1,
+        stock: 1,
+        colors: 1,
+        sizes: 1,
+        reviews: 1,
+        created: 1,
+        updated: 1
+      }
+    }).toArray()
     .then(data => {
-      products = data.map(product => ({
-        id: product._id ? product._id.toString() : null, // check if exists then convert to string
+      const { transformProductData } = require('./Product');
+      products = data.map(product => transformProductData({
+        id: product._id ? product._id.toString() : null,
         category_id: product.category_id ? product.category_id.toString() : null,
         name: product.name,
         description: product.description,
         img: product.img,
-        price: product.price // Add the price field
+        price: product.price,
+        available: product.available,
+        stock: product.stock,
+        colors: product.colors,
+        sizes: product.sizes,
+        reviews: product.reviews,
+        created: product.created,
+        updated: product.updated
       }));
-      // console.log(products); // Log the product names, descriptions, images, and prices to the console
     })
     .catch(err => console.error('Error fetching products', err));
 
@@ -84,11 +107,6 @@ app.get('/api/pagedproducts', async (req, res) => {
   res.json(results);
 });
 
-app.get('/api/products', (req, res) => {
-  const { category_id } = req.query;
-  const filteredProducts = products.filter(product => product.category_id === category_id);
-  res.json(filteredProducts);
-});
 
 app.get(`/api/product/:id`, async (req, res) => {
   const { id } = req.params;

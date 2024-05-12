@@ -48,15 +48,40 @@ const ProductSchema = mongoose.Schema({
     required: true,
   },
   img: {
-    type: String,
+    type: [String],
     required: true,
   },
 });
 
 // Define the transformation function
 function transformProductData(productData) {
+  // Correctly transform the img field to an array of strings (image URLs)
+  let imgLinks = [];
+  if (typeof productData.img === 'string') {
+    // Check if the string is a valid JSON array
+    if (productData.img.trim().startsWith('[')) {
+      try {
+        // Parse the string as JSON and extract the URLs
+        const imgArray = JSON.parse(productData.img.replace(/'/g, '"'));
+        imgLinks = imgArray.map(imgObj => {
+          return typeof imgObj === 'object' ? Object.keys(imgObj)[0] : imgObj;
+        });
+      } catch (error) {
+        console.error('Error parsing image data', error);
+        // If parsing fails, treat as a single URL
+        imgLinks.push(productData.img);
+      }
+    } else {
+      // If it's not a JSON array, assume it's a single URL
+      imgLinks.push(productData.img);
+    }
+  } else if (Array.isArray(productData.img)) {
+    // If it's already an array of URLs, use it as is
+    imgLinks = productData.img;
+  }
+
   return {
-    _id: productData._id || "", // Use the _id field
+    id: productData.id || "", // Use the _id field
     category_id: productData.category_id || "", // Use the category_id field
     available: productData.available || false, // Use the available field
     stock: productData.stock || 0, // Use the stock field
@@ -72,7 +97,7 @@ function transformProductData(productData) {
     created: productData.created || new Date(), // Use the created field
     updated: productData.updated || new Date(), // Use the updated field
     name: productData.name || "", // Use the name field
-    img: productData.img || "", // Use the img field
+    img: imgLinks,
   };
 }
 

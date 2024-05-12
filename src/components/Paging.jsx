@@ -20,7 +20,7 @@ class Paging extends Component {
   constructor(props) {
     super();
     const {
-      totalRecords = null,
+      totalRecords = 0, 
       pageLimit = 30,
       pageNeighbours = 0,
       sizing = "",
@@ -29,7 +29,9 @@ class Paging extends Component {
     this.sizing = typeof sizing === "string" ? sizing : "";
     this.alignment = typeof alignment === "string" ? alignment : "";
     this.pageLimit = typeof pageLimit === "number" ? pageLimit : 30;
-    this.totalRecords = typeof totalRecords === "number" ? totalRecords : 0;
+    const storedTotalRecords = localStorage.getItem('totalRecords');
+    this.totalRecords = storedTotalRecords ? parseInt(storedTotalRecords, 10) : totalRecords;
+    console.log("TotalRecord:" + this.totalRecords);
 
     this.pageNeighbours =
       typeof pageNeighbours === "number"
@@ -39,6 +41,13 @@ class Paging extends Component {
     this.totalPages = Math.ceil(this.totalRecords / this.pageLimit);
 
     this.state = { currentPage: 1 };
+  }
+
+  componentDidUpdate(prevProps) {
+    // If totalRecords prop changes, update it in local storage
+    if (this.props.totalRecords !== prevProps.totalRecords) {
+      localStorage.setItem('totalRecords', this.props.totalRecords);
+    }
   }
 
   componentDidMount() {
@@ -51,7 +60,7 @@ class Paging extends Component {
     const currentPage = Math.max(1, Math.min(page, this.totalPages));
 
     const paginationData = {
-      currentPage,
+      currentPage,  
       totalPages: this.totalPages,
       pageLimit: this.pageLimit,
       totalRecords: this.totalRecords,
@@ -61,7 +70,7 @@ class Paging extends Component {
   };
 
   handleClick = (page, evt) => {
-    evt.preventDefault();
+    evt.preventDefault(); 
     this.gotoPage(page);
   };
 
