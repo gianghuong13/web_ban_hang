@@ -7,7 +7,8 @@ const CardLogin = lazy(() => import("../components/card/CardLogin"));
 
 
 
-const Search = lazy(() => import("./Search"));
+//const Search = lazy(() => import("./Search"));
+const Search = lazy(() => import("./search2"));
 
 const Header = () => {
   const [username, setUsername] = useState(null);
