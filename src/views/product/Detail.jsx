@@ -33,15 +33,18 @@ const ProductDetailView = () => {
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [imgLink, setImgLink] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
+        console.log('Fetching product:', id);
         const response = await axios.get(`http://localhost:3001/api/product/${id}`);
         console.log('Product:', response.data);
         setProduct(response.data);
-        setProductId(response.data._id);
-        console.log('Product ID:', response.data._id);
+        setProductId(response.data.id);
+        console.log('Product ID:', response.data.id);
         setSizes(response.data.sizes);
         setColors(response.data.colors);
         setImgLink(response.data.img);
@@ -63,36 +66,41 @@ useEffect(() => {
 }, [userId]);
 
 const addToCart = () => {
+  setIsLoading(true);
   axios.get('http://localhost:5000/account/user', { withCredentials: true })
-  .then(response => {
-    if (response.data.valid) {
-      setIsLoggedIn(true);
-      console.log(`le response data is: ${JSON.stringify(response.data)}`);
-      setUserId(response.data.user_id);
+    .then(response => {
+      if (response.data.valid) {
+        setIsLoggedIn(true);
+        setUserId(response.data.user_id);
+        console.log('User ID:', response.data.user_id);
+        const quantity = 1;
+        const note = `Size: ${selectedSize}, Color: ${selectedColor}`;
 
-      console.log('Adding product to cart:', product);
-      const quantity = 1;
+        axios.post(`http://localhost:5000/api/cart/${response.data.user_id}/add-item`, { productId, quantity, note })
+          .then(response => {
+            setIsLoading(false);
+            if (response.status === 200) {
+              console.log('Cart updated successfully');
+            } else if (response.status === 201) {
+              console.log('Product added to cart successfully');
+            }
+          })
+          .catch(error => {
+            setIsLoading(false);
+            console.error('Error adding product to cart:', error);
+            // Display an error message to the user
+          });
 
-      axios.post(`http://localhost:5000/api/cart/${response.data.user_id}/add-item`, { productId, quantity, note: `Size: ${selectedSize}, Color: ${selectedColor}` })
-      .then(response => {
-        if (response.status === 200) {
-          console.log('Cart updated successfully');
-        } else if (response.status === 201) {
-          console.log('Product added to cart successfully');
-        }
-      })
-      .catch(error => {
-        console.error('Error adding product to cart:', error);
-      });
-
-    } else {
+      } else {
+        setIsLoading(false);
+        window.location.href = '/account/signin';
+      }
+    })
+    .catch(err => {
+      setIsLoading(false);
+      console.error('Error checking login status:', err);
       window.location.href = '/account/signin';
-    }
-  })
-  .catch(err => {
-    console.error('Error checking login status:', err);
-    window.location.href = '/account/signin';
-  });
+    });
 };
 
   return (
