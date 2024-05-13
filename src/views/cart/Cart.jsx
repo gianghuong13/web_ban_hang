@@ -12,8 +12,7 @@ const CartView = () => {
   const [cartData, setCartData] = useState([]);
   const [productDetails, setProductDetails] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
-  const [userId, setUserId] = useState(null);
-  const [detailsId, setDetailsId] = useState(null);
+  const [cartId, setCartId] = useState(null);
 
   useEffect(() => {
     axios.get('http://localhost:5000/account/user', { withCredentials: true })
@@ -21,11 +20,13 @@ const CartView = () => {
         setIsLoading(false);
         if (response.data.valid) {
           setIsLoggedIn(true);
-          setUserId(response.data.user_id);
-          const userId = response.data.user_id;
   
-          axios.get(`http://localhost:5000/api/user_cart/${userId}`)
-            .then(response => {  
+          axios.get(`http://localhost:5000/api/user_cart/${response.data.user_id}`)
+            .then(response => {
+              console.log(`cartid in respnse.data is ${response.data.cart_id}`);
+              setCartId(response.data[0].cart_id);
+              const cartId = response.data[0].cart_id;
+              console.log(`cartId is: ${cartId}`);
               // Fetch details for each product in the cart
               const cartItems = response.data.map(item => {
                 return axios.get(`http://localhost:3001/api/product/${item.product_id}`)
@@ -44,20 +45,20 @@ const CartView = () => {
                 .then(completedItems => {
                   // Update cartData state with the completed items
                   setCartData(completedItems);
+  
+                  // Fetch total amount
+                  axios.get(`http://localhost:5000/cart/total/${cartId}`)
+                    .then(response => {
+                      console.log(`response.data.totalAmount in cart is: ${response.data.totalAmount}`);
+                      setTotalAmount(response.data.totalAmount);
+                    })
+                    .catch(error => {
+                      console.error('Error fetching cart total:', error);
+                    });
                 });
             })
             .catch(err => {
               console.error('Error fetching cart data:', err);
-            });
-  
-          // Fetch total amount
-          axios.get(`http://localhost:5000/cart/total/${userId}`)
-            .then(response => {
-              console.log(`response.data.totalAmount in cart is: ${response.data.totalAmount}`);
-              setTotalAmount(response.data.totalAmount);
-            })
-            .catch(error => {
-              console.error('Error fetching cart total:', error);
             });
         } else {
           window.location.href = '/account/signin';
@@ -68,12 +69,13 @@ const CartView = () => {
         window.location.href = '/account/signin';
       });
   }, []);
+
   const onSubmitApplyCouponCode = async (values) => {
     alert(JSON.stringify(values));
   };
 
   const deleteItem = (detailsId) => {
-    axios.delete(`http://localhost:5000/api/cart/remove-item/${detailsId}`)
+    axios.delete(`http://localhost:5000/api/cart/${cartId}/remove-item/${detailsId}`)
     .then((response) => {
       console.log(response.data.message);
       window.location.reload();
@@ -83,8 +85,8 @@ const CartView = () => {
     });
   };
 
-  const updateQuantity = (userId, detailsId, quantity) => {
-    axios.put(`http://localhost:5000/api/cart/${userId}/update-item/${detailsId}`, { quantity })
+  const updateQuantity = (detailsId, quantity) => {
+    axios.put(`http://localhost:5000/api/cart/${cartId}/update-item/${detailsId}`, { quantity })
       .then((response) => {
         console.log(response.data.message);
         window.location.reload();
@@ -146,20 +148,21 @@ const CartView = () => {
                                 <button 
                                     className="btn btn-primary text-white" 
                                     type="button" 
-                                    onClick={() => updateQuantity(userId, item.cartdetails_id, item.quantity - 1)}
+                                    onClick={() => item.quantity > 1 && updateQuantity(item.cartdetails_id, item.quantity - 1)}
                                   >
                                     <i className="bi bi-dash-lg"></i>
                                   </button>
                                   <input 
-                                    type="text" 
+                                    type="number" 
                                     className="form-control" 
-                                    defaultValue={item.quantity} 
-                                    onChange={(e) => updateQuantity(userId, item.cartdetails_id, e.target.value)}
+                                    value={item.quantity} 
+                                    min="1"
+                                    onChange={(e) => updateQuantity(item.cartdetails_id, Number(e.target.value))}
                                   />
                                   <button 
                                     className="btn btn-primary text-white" 
                                     type="button" 
-                                    onClick={() => updateQuantity(userId, item.cartdetails_id, item.quantity + 1)}
+                                    onClick={() => updateQuantity(item.cartdetails_id, item.quantity + 1)}
                                   >
                                     <i className="bi bi-plus-lg"></i>
                                   </button>

@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 06, 2024 at 09:32 PM
--- Server version: 10.4.32-MariaDB
+-- Generation Time: May 13, 2024 at 08:24 PM
+-- Server version: 10.4.32-MariaDB-log
 -- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -63,11 +63,8 @@ CREATE TABLE `address` (
 --
 
 INSERT INTO `address` (`address_id`, `user_id`, `country`, `city`, `province`, `address`, `primary`) VALUES
-(7, 1, 'Vietnam', 'Hanoi', 'Cau Giay', '144 Xuan Thuy', 0),
-(8, 1, 'Virgin Island', 'Ohio ', 'Dive', '727 dude', 1),
-(9, 3, 'Vietnam', 'Oil', 'Ha Noi', 'Oil Oil', 0),
-(10, 3, 'Vietnam', 'Oi', 'Ha Noi', 'Oi Oi', 0),
-(11, 1, 'Virgin Island', 'Ohio ', 'Skibidi', 'Toilet', 0);
+(24, 1, 'Vietnam', 'Hanoi', 'Cau Giay', '144 Xuan Thuy, UET', 0),
+(26, 1, 'Vietnam', 'Phu Tho', 'Thi Xa Phu Tho', 'Phu Ho', 1);
 
 -- --------------------------------------------------------
 
@@ -89,10 +86,10 @@ CREATE TABLE `cartdetails` (
 --
 
 INSERT INTO `cartdetails` (`cartdetails_id`, `cart_id`, `product_id`, `priceEach`, `quantity`, `note`) VALUES
-(11, 1, 'products_id_3', 50, 4, 'Size: XL, Color: Ghi'),
-(16, 1, 'products_id_3', 50, 5, 'Size: XL, Color: Xanh'),
-(17, 1, 'products_id_3', 50, 1, 'Size: L, Color: Ghi'),
-(18, 1, 'products_id_3', 50, 2, 'Size: M, Color: Ghi');
+(29, 802, 'shoes_3', 501, 12, 'Size: 9, Color: Black'),
+(30, 802, 'shoes_5', 559, 6, 'Size: 9, Color: Black'),
+(31, 801, 'shoes_5', 559, 1, 'Size: 9, Color: Black'),
+(32, 801, 'shoes_2', 361, 2, 'Size: 9, Color: Black');
 
 -- --------------------------------------------------------
 
@@ -112,7 +109,8 @@ CREATE TABLE `carts` (
 --
 
 INSERT INTO `carts` (`cart_id`, `user_id`, `createdAt`, `status`) VALUES
-(1, 1, '2024-05-02 21:31:48', 0);
+(801, 1, '2024-05-13 23:25:16', 1),
+(802, 2, '2024-05-13 23:57:55', 1);
 
 -- --------------------------------------------------------
 
@@ -130,6 +128,16 @@ CREATE TABLE `orderdetails` (
   `discount` float DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `orderdetails`
+--
+
+INSERT INTO `orderdetails` (`orderdetails_id`, `order_id`, `product_id`, `priceEach`, `quantityOrdered`, `note`, `discount`) VALUES
+(144, 41, 'shoes_5', 559, 1, 'Size: 9, Color: Black', NULL),
+(145, 41, 'shoes_2', 361, 2, 'Size: 9, Color: Black', NULL),
+(146, 42, 'shoes_5', 559, 1, 'Size: 9, Color: Black', NULL),
+(147, 42, 'shoes_2', 361, 2, 'Size: 9, Color: Black', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -142,8 +150,17 @@ CREATE TABLE `orders` (
   `status` varchar(45) NOT NULL,
   `orderDate` datetime NOT NULL,
   `shippedDate` datetime DEFAULT NULL,
-  `cart_id` int(11) DEFAULT NULL
+  `cart_id` int(11) DEFAULT NULL,
+  `address_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`order_id`, `user_id`, `status`, `orderDate`, `shippedDate`, `cart_id`, `address_id`) VALUES
+(41, 1, 'Processing', '2024-05-14 01:21:36', NULL, 801, 26),
+(42, 1, 'Processing', '2024-05-14 01:23:54', NULL, 801, 26);
 
 -- --------------------------------------------------------
 
@@ -182,9 +199,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `first_name`, `last_name`, `username`, `email`, `phone`, `password`, `admin`, `registeredAt`, `lastLogin`) VALUES
-(1, 'Le', 'Cong Hoang', 'cusnaruto', '22026555@gmail.com', '0727277727', '$2b$10$qhFEJvQ33CkvymciWjxL8.ptktyhn9TIlMM.4Qd1iK337DeGOwoRK', 0, '2024-04-21 21:41:46', '2024-05-07 02:31:13'),
+(1, 'Le', 'Cong Hoang', 'cusnaruto', '22026555@gmail.com', '0727277727', '$2b$10$qhFEJvQ33CkvymciWjxL8.ptktyhn9TIlMM.4Qd1iK337DeGOwoRK', 0, '2024-04-21 21:41:46', '2024-05-14 01:23:40'),
 (2, 'Hoang', 'Cong', 'hoang', 'nibix39919@dxice.com', '', '$2b$10$40L5mWX.hA6giwhiYWiGMuCTTQEEDmnWDR.T0Nl.B9Aeo/J4dB5He', 0, '2024-04-29 19:56:37', NULL),
-(3, NULL, NULL, 'thangman', 'hohoho@gmail.com', '', '$2b$10$IZ0jJDoeo9JVWZUEqPtC3.TtDSpAVf02sC0/QlxwOkn/qTS9QV5TW', 0, '2024-04-29 20:10:37', '2024-05-06 23:23:47'),
+(3, NULL, NULL, 'thangman', 'hohoho@gmail.com', '', '$2b$10$IZ0jJDoeo9JVWZUEqPtC3.TtDSpAVf02sC0/QlxwOkn/qTS9QV5TW', 0, '2024-04-29 20:10:37', '2024-05-07 22:55:08'),
 (4, 'Rob', 'Bank', 'thang', 'ngotband@gmial.com', '', '$2b$10$dpLEbXeloum84PLEbsyyXuDEyC1nfzvHGat9LgZSFTas7vUY9wLz2', 0, '2024-04-29 20:11:30', '2024-04-29 20:31:40'),
 (5, 'FDSFDS', 'fvdsvxcvc', 'cusnaaarutooo', 'hoang3332@gmail.com', '', '$2b$10$OSSS7XKf1EEA59lamWGjmuCBe1aDOXBNxVLvyn.lrTm3omKhAb9i6', 0, '2024-04-29 20:47:02', '2024-04-29 20:47:15'),
 (6, 'Le', 'Cong Hoangf', 'whatthefuckkkk', 'nibix39919@dxice.com.vn', '', '$2b$10$41LT/Lt8xv1o6NvPq0o99e3LGB8QqqL7JjoH4fa6In4wzqnVuF4XK', 0, '2024-04-29 20:48:14', '2024-04-29 20:54:30'),
@@ -220,14 +237,11 @@ CREATE TABLE `user_cart_view` (
 --
 CREATE TABLE `user_orders_view` (
 `user_id` int(11)
-,`email` varchar(45)
 ,`order_id` int(11)
 ,`order_status` varchar(45)
-,`orderDate` datetime
-,`shippedDate` datetime
-,`product_id` varchar(45)
-,`product_price` float
-,`quantityOrdered` int(11)
+,`order_date` datetime
+,`shipped_date` datetime
+,`total` double
 );
 
 -- --------------------------------------------------------
@@ -257,7 +271,7 @@ CREATE TABLE `user_profile_view` (
 --
 DROP TABLE IF EXISTS `user_cart_view`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `user_cart_view`  AS SELECT `u`.`user_id` AS `user_id`, `u`.`email` AS `email`, `c`.`cart_id` AS `cart_id`, `c`.`status` AS `card_status`, `cd`.`product_id` AS `product_id`, `cd`.`quantity` AS `quantity`, `cd`.`priceEach` AS `priceEach`, `cd`.`cartdetails_id` AS `cartdetails_id`, `cd`.`note` AS `note` FROM ((`users` `u` join `carts` `c` on(`u`.`user_id` = `c`.`user_id`)) join `cartdetails` `cd` on(`c`.`cart_id` = `cd`.`cart_id`)) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `user_cart_view`  AS SELECT `u`.`user_id` AS `user_id`, `u`.`email` AS `email`, `c`.`cart_id` AS `cart_id`, `c`.`status` AS `card_status`, `cd`.`product_id` AS `product_id`, `cd`.`quantity` AS `quantity`, `cd`.`priceEach` AS `priceEach`, `cd`.`cartdetails_id` AS `cartdetails_id`, `cd`.`note` AS `note` FROM ((`users` `u` join `carts` `c` on(`u`.`user_id` = `c`.`user_id`)) join `cartdetails` `cd` on(`c`.`cart_id` = `cd`.`cart_id`)) WHERE `c`.`status` = 1 ;
 
 -- --------------------------------------------------------
 
@@ -266,7 +280,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `user_orders_view`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `user_orders_view`  AS SELECT `u`.`user_id` AS `user_id`, `u`.`email` AS `email`, `o`.`order_id` AS `order_id`, `o`.`status` AS `order_status`, `o`.`orderDate` AS `orderDate`, `o`.`shippedDate` AS `shippedDate`, `od`.`product_id` AS `product_id`, `od`.`priceEach` AS `product_price`, `od`.`quantityOrdered` AS `quantityOrdered` FROM ((`users` `u` join `orders` `o` on(`u`.`user_id` = `o`.`user_id`)) left join `orderdetails` `od` on(`o`.`order_id` = `od`.`order_id`)) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `user_orders_view`  AS SELECT `u`.`user_id` AS `user_id`, `o`.`order_id` AS `order_id`, `o`.`status` AS `order_status`, `o`.`orderDate` AS `order_date`, `o`.`shippedDate` AS `shipped_date`, sum(`od`.`priceEach` * `od`.`quantityOrdered`) AS `total` FROM ((`users` `u` join `orders` `o` on(`u`.`user_id` = `o`.`user_id`)) left join `orderdetails` `od` on(`o`.`order_id` = `od`.`order_id`)) GROUP BY `u`.`user_id`, `o`.`order_id`, `o`.`status`, `o`.`orderDate`, `o`.`shippedDate` ;
 
 -- --------------------------------------------------------
 
@@ -315,7 +329,8 @@ ALTER TABLE `orderdetails`
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`order_id`),
   ADD KEY `fk_order_user_userId_idx` (`user_id`),
-  ADD KEY `fk_order_cart_cartid_idx` (`cart_id`);
+  ADD KEY `fk_order_cart_cartid_idx` (`cart_id`),
+  ADD KEY `fk_order_address_addressid` (`address_id`);
 
 --
 -- Indexes for table `payments`
@@ -337,25 +352,31 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `address`
 --
 ALTER TABLE `address`
-  MODIFY `address_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `address_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `cartdetails`
 --
 ALTER TABLE `cartdetails`
-  MODIFY `cartdetails_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `cartdetails_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+
+--
+-- AUTO_INCREMENT for table `carts`
+--
+ALTER TABLE `carts`
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=803;
 
 --
 -- AUTO_INCREMENT for table `orderdetails`
 --
 ALTER TABLE `orderdetails`
-  MODIFY `orderdetails_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `orderdetails_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=148;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -395,6 +416,7 @@ ALTER TABLE `orderdetails`
 -- Constraints for table `orders`
 --
 ALTER TABLE `orders`
+  ADD CONSTRAINT `fk_order_address_addressid` FOREIGN KEY (`address_id`) REFERENCES `address` (`address_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_order_cart_cartid` FOREIGN KEY (`cart_id`) REFERENCES `carts` (`cart_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_order_user_userId` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
