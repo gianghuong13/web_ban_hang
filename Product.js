@@ -10,7 +10,7 @@ const ProductSchema = mongoose.Schema({
     required: true,
   },
   available: {
-    type: Boolean,
+    type: String,
     required: true,
   },
   stock: {
@@ -35,14 +35,6 @@ const ProductSchema = mongoose.Schema({
   },
   description: String,
   reviews: [String], // Assuming reviews is an array of strings
-  created: {
-    type: Date,
-    required: true,
-  },
-  updated: {
-    type: Date,
-    required: true,
-  },
   name: {
     type: String,
     required: true,
@@ -51,12 +43,31 @@ const ProductSchema = mongoose.Schema({
     type: [String],
     required: true,
   },
+  review: {
+    user_id: {
+      type: [String], // Array of strings
+      default: [] // Default value is an empty array
+    },
+    rating: {
+      type: [Number], // Array of numbers
+      default: [] // Default value is an empty array
+    },
+    review: {
+      type: [String], // Array of strings
+      default: [] // Default value is an empty array
+    }
+  },
 });
 
 // Define the transformation function
 function transformProductData(productData) {
   // Correctly transform the img field to an array of strings (image URLs)
   let imgLinks = [];
+  let review = {
+    user_id: [],
+    rating: [],
+    review: []
+  };
   if (typeof productData.img === 'string') {
     // Check if the string is a valid JSON array
     if (productData.img.trim().startsWith('[')) {
@@ -96,10 +107,22 @@ function transformProductData(productData) {
     }
   }
 
+  if (productData.review && typeof productData.review === 'object') {
+    // Check if user_id, rating, and review are arrays
+    if (Array.isArray(productData.review.user_id)) {
+      review.user_id = productData.review.user_id;
+    }
+    if (Array.isArray(productData.review.rating)) {
+      review.rating = productData.review.rating;
+    }
+    if (Array.isArray(productData.review.review)) {
+      review.review = productData.review.review;
+    }
+  }
   return {
     id: productData.id || "", // Use the _id field
     category_id: productData.category_id || "", // Use the category_id field
-    available: productData.available || false, // Use the available field
+    available: productData.available || "FALSE", // Use the available field
     stock: productData.stock || 0, // Use the stock field
     colors: productData.colors || [], // Use the color field
     sizes: productData.sizes || [], // Use the size field
@@ -110,10 +133,9 @@ function transformProductData(productData) {
     } : { original: 0, discount: 0, price: 0 },
     description: productData.description || "", // Use the description field
     reviews: productData.reviews || [], // Use the reviews field
-    created: productData.created || new Date(), // Use the created field
-    updated: productData.updated || new Date(), // Use the updated field
     name: productData.name || "", // Use the name field
     img: imgLinks,
+    review: review,
   };
 }
 

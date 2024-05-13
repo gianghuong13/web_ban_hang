@@ -303,8 +303,8 @@ const handleNextImage = () => {
                   role="tabpanel"
                   aria-labelledby="nav-randr-tab"
                 >
-                  {Array.from({ length: 5 }, (_, key) => (
-                    <RatingsReviews key={key} />
+                  {product && product.review && product.review.review.map((reviewText, idx) => (
+                    <RatingsReviews key={idx} product={product} review={reviewText} rating={product.review.rating[idx]} />
                   ))}
                 </div>
                 <div

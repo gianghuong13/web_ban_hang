@@ -123,6 +123,35 @@ app.put(`/api/product/:id`, async (req, res) => {
   }
 });
 
+app.put(`/api/product/:id/review`, async (req, res) => {
+  const { id } = req.params;
+  const { userId, rating, review } = req.body;
+
+  if (!userId || !rating || !review) {
+    return res.status(400).json({ error: 'User ID, rating and review are required' });
+  }
+
+  try {
+    const product = await ProductModel.findById(id);
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    // Add the new review to the product's reviews
+    product.review = product.review || { review: [], rating: [], user_id: [] };
+    product.review.review.push(review);
+    product.review.rating.push(rating);
+    product.review.user_id.push(userId);
+
+    // Save the updated product
+    const updatedProduct = await product.save();
+
+    return res.status(200).json(updatedProduct);
+  } catch (error) {
+    console.error('Error adding review', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
 // Delete an existing product
 app.delete(`/api/product/:id`, async (req, res) => {
   const { id } = req.params;
