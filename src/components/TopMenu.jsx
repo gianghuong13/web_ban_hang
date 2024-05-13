@@ -1,6 +1,15 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const TopMenu = () => {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:3001/api/categories')
+      .then(response => response.json())
+      .then(data => setCategories(data));
+  }, []);
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark p-0">
       <div className="container-fluid">
@@ -31,80 +40,13 @@ const TopMenu = () => {
                 Menu
               </button>
               <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-                {/* <li>
-                  <Link className="dropdown-item" to="/account/signin">
-                    Sign In
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/account/signup">
-                    Sign Up
-                  </Link>
-                </li>
-                <li>
-                  <hr className="dropdown-divider" />
-                </li> */}
-                <li>
-                  <Link className="dropdown-item" to="/category">
-                    Ready-to-wear
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/category">
-                    Skirt
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/category">
-                    Dress
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/category">
-                    Pants
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/category">
-                    Jacket
-                  </Link>
-                </li>
-                <li>
-                  <hr className="dropdown-divider" />
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/checkout">
-                    Checkout Page
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/contact-us">
-                    Contact Us
-                  </Link>
-                </li>
-                {/* <li>
-                  <Link className="dropdown-item" to="/blog">
-                    Blog
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/blog/detail">
-                    Blog Detail
-                  </Link>
-                </li> */}
-                {/* <li>
-                  <hr className="dropdown-divider" />
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/fsafasf">
-                    404 Page Not Found
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/500">
-                    500 Internal Server Error
-                  </Link>
-                </li> */}
+                {categories.map((category, index) => (
+                  <li key={index}>
+                    <Link className="dropdown-item" to={`/category/${category.id}`} onClick={() => window.location.href=`/category/${category.id}`}>
+                      {category.name}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </li>
             <li className="nav-item">
@@ -118,7 +60,7 @@ const TopMenu = () => {
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/category">
+              <Link className="nav-link" to="/category" onClick={() => window.location.href=`/category`}>
                 Fashion
               </Link>
             </li>
