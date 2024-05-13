@@ -67,8 +67,13 @@ const ProductListView = () => {
       const start = (currentPage - 1) * pageLimit;
       const end = start + pageLimit;
       setCurrentProducts(filteredProducts.slice(start, end));
+      setTotalItems(filteredProducts.length); // Update totalItems with the length of the filteredProducts array
     }
   }, [allProducts, categoryId, minPrice, maxPrice, currentPage]);
+
+  useEffect(() => {
+    setTotalPages(Math.ceil(filteredProducts.length / pageLimit));
+  }, [filteredProducts]);
 
     return (
       <React.Fragment>

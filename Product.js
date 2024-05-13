@@ -76,8 +76,24 @@ function transformProductData(productData) {
       imgLinks.push(productData.img);
     }
   } else if (Array.isArray(productData.img)) {
-    // If it's already an array of URLs, use it as is
-    imgLinks = productData.img;
+    // If it's an array
+    if (productData.img.length > 0 && typeof productData.img[0] === 'string' && productData.img[0].trim().startsWith('[')) {
+      // Check if the first element of the array is a string that can be parsed into an array of objects
+      try {
+        // Parse the string as JSON and extract the URLs
+        const imgArray = JSON.parse(productData.img[0].replace(/'/g, '"'));
+        imgLinks = imgArray.map(imgObj => {
+          return typeof imgObj === 'object' ? Object.keys(imgObj)[0] : imgObj;
+        });
+      } catch (error) {
+        console.error('Error parsing image data', error);
+        // If parsing fails, treat as a single URL
+        imgLinks.push(productData.img[0]);
+      }
+    } else {
+      // If it's already an array of URLs, use it as is
+      imgLinks = productData.img;
+    }
   }
 
   return {

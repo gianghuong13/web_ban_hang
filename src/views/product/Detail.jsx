@@ -33,21 +33,22 @@ const ProductDetailView = () => {
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
   const [imgLink, setImgLink] = useState('');
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(`http://localhost:3001/api/product/${id}`);
-        console.log('Product:', response.data);
+        // console.log('Product:', response.data);
         setProduct(response.data);
         setProductId(response.data._id);
-        console.log('Product ID:', response.data._id);
+        // console.log('Product ID:', response.data._id);
         setSizes(response.data.sizes);
         setColors(response.data.colors);
         setImgLink(response.data.img);
-        console.log('Img:', response.data.img);
-        console.log('Sizes:', response.data.sizes);
-        console.log('Colors:', response.data.colors);
+        // console.log('Img:', response.data.img);
+        // console.log('Sizes:', response.data.sizes);
+        // console.log('Colors:', response.data.colors);
       } catch (error) {
         console.error(error);
       }
@@ -95,17 +96,40 @@ const addToCart = () => {
   });
 };
 
+const handleNextImage = () => {
+  setCurrentImageIndex((currentImageIndex + 1) % (product ? product.img.length : 1));
+};
+
   return (
     <div className="container-fluid mt-3">
       <div className="row">
         <div className="col-md-8">
           <div className="row mb-3">
             <div className="col-md-5 text-center">
-              <img
-                src= {product ? product.img : imgLink}
-                className="img-fluid mb-3"
-                alt={product?.name}
-              />
+              {product ? (
+                <>
+                  <img
+                    src={product.img[currentImageIndex]}
+                    className="img-fluid mb-3"
+                    alt={`${product.name} ${currentImageIndex}`}
+                    style={{maxWidth: '350px', maxHeight: '350px'}}
+                  />
+                  <div className="mt-3">
+                    {product.img.map((imgUrl, index) => (
+                      <img
+                        key={index}
+                        src={imgUrl}
+                        className="img-thumbnail mr-2"
+                        alt={`${product.name} ${index}`}
+                        style={{width: '60px', cursor: 'pointer'}}
+                        onClick={() => setCurrentImageIndex(index)}
+                      />
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <img src={imgLink} className="img-fluid mb-3" alt="Loading..." />
+              )}
             </div>
             <div className="col-md-7">
             <h1 className="h5 d-inline me-2">{product ? product.name : 'Loading...'}</h1>

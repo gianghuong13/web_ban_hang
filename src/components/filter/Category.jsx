@@ -33,7 +33,11 @@ const FilterCategory = () => {
       >
         {categories.map((category, index) => (
           <li key={index} className="list-group-item">
-            <Link to={`/category/${category.id}`} className="text-decoration-none stretched-link">
+            <Link 
+              to={`/category/${category.id}`} 
+              className="text-decoration-none stretched-link"
+              onClick={() => window.location.href=`/category/${category.id}`}
+            >
               {category.name}
             </Link>
           </li>
