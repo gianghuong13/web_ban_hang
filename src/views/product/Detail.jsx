@@ -56,10 +56,6 @@ const ProductDetailView = () => {
 
 }, [id]);
 
-useEffect(() => {
-  console.log(`le user id is ${userId}`);
-}, [userId]);
-
 const addToCart = () => {
   setIsLoading(true);
   axios.get('http://localhost:5000/account/user', { withCredentials: true })
@@ -297,9 +293,9 @@ const handleNextImage = () => {
                   role="tabpanel"
                   aria-labelledby="nav-randr-tab"
                 >
-                  {product && product.review && product.review.review.map((reviewText, idx) => (
-                    <RatingsReviews key={idx} product={product} review={reviewText} rating={product.review.rating[idx]} />
-                  ))}
+                  {product && product.review && (
+                    <RatingsReviews product={product} />
+                  )}
                 </div>
                 <div
                   className="tab-pane fade"

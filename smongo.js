@@ -125,9 +125,9 @@ app.put(`/api/product/:id`, async (req, res) => {
 
 app.put(`/api/product/:id/review`, async (req, res) => {
   const { id } = req.params;
-  const { userId, rating, review } = req.body;
+  const { user_id, rating, review } = req.body; // Change this line
 
-  if (!userId || !rating || !review) {
+  if (!user_id || !rating || !review) { // And this line
     return res.status(400).json({ error: 'User ID, rating and review are required' });
   }
 
@@ -138,13 +138,13 @@ app.put(`/api/product/:id/review`, async (req, res) => {
     }
 
     // Check if the user has already reviewed the product
-    if (product.review.user_id.includes(userId)) {
-      return res.status(400).json({ error: 'User has already reviewed this product' });
+    if (product.review.user_id.map(String).includes(String(user_id))) { // And this line
+      return res.status(402).json({ error: 'User has already reviewed this product' });
     }
 
     product.review.review.push(review);
     product.review.rating.push(rating);
-    product.review.user_id.push(userId);
+    product.review.user_id.push(user_id); // And this line
 
     // Save the updated product
     const updatedProduct = await product.save();

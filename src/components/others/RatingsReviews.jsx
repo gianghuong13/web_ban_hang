@@ -8,7 +8,6 @@ const RatingsReviews = (props) => {
   const [userNames, setUserNames] = useState({});
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loggedInUserId, setLoggedInUserId] = useState(null);
-  const [userHasReviewed, setUserHasReviewed] = useState(false);
   const [rating, setRating] = useState(1);
   const [review, setReview] = useState('');
   const { id } = useParams();
@@ -38,8 +37,8 @@ const RatingsReviews = (props) => {
         const userResponse = await axios.get('http://localhost:5000/account/user', { withCredentials: true });
         if (userResponse.data.valid) {
           setIsLoggedIn(true);
+          console.log(userResponse.data.user_id);
           setLoggedInUserId(userResponse.data.user_id);
-          setUserHasReviewed(userIds.includes(userResponse.data.user_id));
         }
       } catch (error) {
         console.error(error);
@@ -54,7 +53,7 @@ const RatingsReviews = (props) => {
   
     try {
       await axios.put(`http://localhost:3001/api/product/${id}/review`, {
-        user_id: loggedInUserId,
+        user_id: String(loggedInUserId),
         rating,
         review,
       }, { withCredentials: true });
@@ -62,7 +61,7 @@ const RatingsReviews = (props) => {
       // Refresh the product data
       window.location.reload();
     } catch (error) {
-      if (error.response && error.response.status === 400) {
+      if (error.response && error.response.status === 402) {
         setErrorMessage('You have already reviewed this product');
       } else {
         console.error(error);
