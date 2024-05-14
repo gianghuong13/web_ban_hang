@@ -22,7 +22,7 @@ app.use(cors());
 async function searchProducts(query) {
   try {
     const body = await client.search({
-      index: 'test_products_index',
+      index: 'connectproducts2',
       body: {
           query: {
               match: {

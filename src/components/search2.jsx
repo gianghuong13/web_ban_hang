@@ -13,7 +13,6 @@ const Search = () => {
     const handleSearch = async () => {
         try {
             setLoading(true);
-            //const response = await axios.get(`/api/products/search?q=${searchQuery}`);
             const response = await axios.get(`http://localhost:3002/api/products/search?q=${searchQuery}`);
 
             setProducts(response.data);

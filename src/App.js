@@ -8,6 +8,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import "./App.min.css";
 import {RequireToken} from './components/Auth.js'
+import Search from './components/Search3';
 //const Header = lazy(() => import("./components/Header"));
 //const TopMenu = lazy(() => import("./components/TopMenu"));
 const HomeView = lazy(() => import("./views/Home"));
@@ -32,7 +33,6 @@ const ContactUsView = lazy(() => import("./views/pages/ContactUs"));
 const SupportView = lazy(() => import("./views/pages/Support"));
 const BlogView = lazy(() => import("./views/blog/Blog"));
 const BlogDetailView = lazy(() => import("./views/blog/Detail"));
-
 
 function App() {
   return (
@@ -78,6 +78,7 @@ function App() {
             <Route exact path="/500" element={<InternalServerErrorView/>} />
             <Route path="/category/:categoryId" element={<ProductListView />} />
             <Route path="*" element={<NotFoundView/>} />
+            <Route path="/search" element={<Search/>} />
           </Routes>
         </Suspense>
         <Footer />

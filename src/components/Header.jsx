@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
 
@@ -8,7 +8,7 @@ const CardLogin = lazy(() => import("../components/card/CardLogin"));
 
 
 //const Search = lazy(() => import("./Search"));
-const Search = lazy(() => import("./search2"));
+//const Search = lazy(() => import("./search2"));
 
 const Header = () => {
   const [username, setUsername] = useState(null);
@@ -34,6 +34,16 @@ const Header = () => {
         console.error('Error logging out:', err);
       });
   };
+      const [searchQuery, setSearchQuery] = useState('');
+      const navigate = useNavigate();
+
+      const handleSearchSubmit = (event) => {
+        event.preventDefault();
+        if (searchQuery.trim()) {
+          navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+        }
+      };
+  
   return (
     <header className="p-3 border-bottom bg-light">
       <div className="container-fluid">
@@ -44,7 +54,16 @@ const Header = () => {
             </Link>
           </div>
           <div className="col-md-5">
-            <Search />
+            <form onSubmit={handleSearchSubmit} className="d-flex">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search for products"
+                className="form-control me-2"
+              />
+              <button type="submit" className="btn btn-primary">Search</button>
+            </form>
           </div>
           <div className="col-md-4">
             <div className="position-relative d-inline me-3">
