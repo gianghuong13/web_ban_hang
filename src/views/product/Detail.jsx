@@ -42,23 +42,17 @@ const ProductDetailView = () => {
       try {
         console.log('Fetching product:', id);
         const response = await axios.get(`http://localhost:3001/api/product/${id}`);
-        // console.log('Product:', response.data);
         setProduct(response.data);
         setProductId(response.data._id);
-        // console.log('Product ID:', response.data._id);
         setSizes(response.data.sizes);
         setColors(response.data.colors);
         setImgLink(response.data.img);
-        // console.log('Img:', response.data.img);
-        // console.log('Sizes:', response.data.sizes);
-        // console.log('Colors:', response.data.colors);
       } catch (error) {
         console.error(error);
       }
     };
   
     fetchProduct();
-
 
 }, [id]);
 

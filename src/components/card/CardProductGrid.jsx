@@ -23,7 +23,7 @@ const CardProductGrid = (props) => {
       >
         -
         {product.price.discount > 0
-          ? product.price.discount + "%"
+          ? product.price.discount + "$"
           : "$" + product.price.discount}
       </span>
     )}

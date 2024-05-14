@@ -34,7 +34,6 @@ const ProductSchema = mongoose.Schema({
     },
   },
   description: String,
-  reviews: [String], // Assuming reviews is an array of strings
   name: {
     type: String,
     required: true,
@@ -132,10 +131,9 @@ function transformProductData(productData) {
       price: parseFloat(productData.price.price) || 0,
     } : { original: 0, discount: 0, price: 0 },
     description: productData.description || "", // Use the description field
-    reviews: productData.reviews || [], // Use the reviews field
     name: productData.name || "", // Use the name field
     img: imgLinks,
-    review: review,
+    review: review
   };
 }
 

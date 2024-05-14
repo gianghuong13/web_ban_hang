@@ -6,7 +6,11 @@ const { ProductModel, transformProductData } = require('./Product');
 
 
 const app = express();
-app.use(cors()); // This will enable CORS
+app.use(cors({
+  origin: 'http://localhost:3000', // Allow requests from this origin
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true, // Allow cookies
+}));
 app.use(bodyParser.json());
 const port = 3001;
 // MongoDB Atlas connection string
@@ -45,9 +49,7 @@ mongoose.connect(url)
         stock: 1,
         colors: 1,
         sizes: 1,
-        reviews: 1,
-        created: 1,
-        updated: 1
+        review: 1
       }
     }).toArray()
     .then(data => {
@@ -63,9 +65,7 @@ mongoose.connect(url)
         stock: product.stock,
         colors: product.colors,
         sizes: product.sizes,
-        reviews: product.reviews,
-        created: product.created,
-        updated: product.updated
+        review: product.review
       }));
     })
     .catch(err => console.error('Error fetching products', err));
@@ -137,8 +137,11 @@ app.put(`/api/product/:id/review`, async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    // Add the new review to the product's reviews
-    product.review = product.review || { review: [], rating: [], user_id: [] };
+    // Check if the user has already reviewed the product
+    if (product.review.user_id.includes(userId)) {
+      return res.status(400).json({ error: 'User has already reviewed this product' });
+    }
+
     product.review.review.push(review);
     product.review.rating.push(rating);
     product.review.user_id.push(userId);
