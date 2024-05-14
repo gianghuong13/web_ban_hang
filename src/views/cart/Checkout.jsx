@@ -8,6 +8,7 @@ const CheckoutView = () => {
   const [profileData, setProfileData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState(null);
+  const [cartId, setCartId] = useState(null);
   const [defaultAddress, setDefaultAddress] = useState(null);
   const [addresses, setAddresses] = useState([]); // State to hold addresses
   const [formData, setFormData] = useState({
@@ -38,10 +39,13 @@ const CheckoutView = () => {
                     return item;
                   });
               });
-
+  
               Promise.all(cartItems)
                 .then(completedItems => {
                   setCartData(completedItems);
+                  if (completedItems.length > 0) {
+                    setCartId(completedItems[0].cart_id);
+                  }
                 });
             });
 
@@ -145,19 +149,28 @@ const CheckoutView = () => {
     }
   
     console.log('Request data:', {
-      cart_id: userId, // Replace cartId with the actual cart_id from your state
-      address_id: addressToUse?.address_id || '' // Use address_id if available, otherwise use an empty string
+      cart_id: cartId,
+      address_id: addressToUse?.address_id || ''
     });
   
     try {
       const response = await axios.post(`http://localhost:5000/api/order/${userId}/add`, {
-        cart_id: userId, // Replace cartId with the actual cart_id from your state
-        address_id: addressToUse?.address_id || '' // Use addressToUse's address_id if available, otherwise use an empty string
+        cart_id: cartId,
+        address_id: addressToUse?.address_id || ''
       }, {
         withCredentials: true
       });
       console.log('Order created successfully:', response.data);
-      setOrderSuccess(true); // Set orderSuccess to true after successful submission
+      setOrderSuccess(true);
+  
+      try {
+        console.log(`Updating cart status for cart ID ${cartId}`)
+        const updateCartResponse = await axios.put(`http://localhost:5000/api/user_cart/${cartId}/primary/`);
+        console.log('Cart status updated successfully:', updateCartResponse.data);
+      } catch (updateCartError) {
+        console.error('Error updating cart status:', updateCartError);
+      }
+  
       window.location.href = 'account/orders';
     } catch (error) {
       console.error(error);

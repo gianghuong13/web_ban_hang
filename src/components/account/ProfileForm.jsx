@@ -26,14 +26,23 @@ const ProfileForm = (props) => {
   } = props;
     const [isLoading, setIsLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [country, setCountry] = useState('');
-    const [province, setProvince] = useState('');
+    const [userId, setUserId] = useState(null);
+    const [addresses, setAddresses] = useState([]); // State to hold addresses
     useEffect(() => {
       axios.get('http://localhost:5000/account/user', { withCredentials: true })
         .then(response => {
           setIsLoading(false);
           if (response.data.valid) {
             setIsLoggedIn(true);
+            setUserId(response.data.user_id); // Set the userId state
+            axios.get(`http://localhost:5000/account/${response.data.user_id}/addresses`, { withCredentials: true }) // Fetch addresses
+              .then(response => {
+                console.log('Addresses:', response.data);
+                setAddresses(response.data);
+              })
+              .catch(error => {
+                console.error(error);
+              });
           } else {
             window.location.href = '/account/signin';
           }
@@ -52,6 +61,38 @@ const ProfileForm = (props) => {
       })
       .catch(err => {
         console.error('Error updating user:', err);
+      });
+  };
+
+  const deleteAddress = (addressId) => {
+    axios.delete(`http://localhost:5000/account/address/remove/${addressId}`, { withCredentials: true })
+      .then(response => {
+        console.log('Address deleted successfully');
+        // Remove the deleted address from the addresses state
+        setAddresses(addresses.filter(address => address.address_id !== addressId));
+      })
+      .catch(err => {
+        console.error('Error deleting address:', err);
+      });
+  };
+
+  const makePrimary = (addressId) => {
+    axios.put(`http://localhost:5000/account/${userId}/address/${addressId}/primary`, {}, { withCredentials: true })
+      .then(response => {
+        console.log('Address updated successfully');
+        // Update the addresses state to reflect the change
+        setAddresses(addresses.map(address => {
+          if (address.address_id === addressId) {
+            return { ...address, primary: 1 };
+          } else if (address.primary === 1) {
+            return { ...address, primary: 0 };
+          } else {
+            return address;
+          }
+        }));
+      })
+      .catch(err => {
+        console.error('Error updating address:', err);
       });
   };
 
@@ -105,10 +146,32 @@ const ProfileForm = (props) => {
             </button>
           </div>
         </div>
-      </form> {/* Closing the first form here */}
+      </form>
+      <div className="card border-primary mt-4">
+      <h6 className="card-header">
+        <i className="bi bi-truck"></i> Shipping Information
+      </h6>
+      <div className="card-body">
+        <div className="row g-3">
+          {/* Render addresses with delete and make primary buttons */}
+          {addresses.map(address => (
+            <div key={address.address_id} className="col-md-12">
+              <label>
+                {`${address.address}, ${address.province}, ${address.city}, ${address.country}`}
+              </label>
+              <button onClick={() => deleteAddress(address.address_id)}>
+                Delete
+              </button>
+              <button onClick={() => makePrimary(address.address_id)}>
+                Make Primary
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
     </>
   );
-  
 };
 
 export default compose(

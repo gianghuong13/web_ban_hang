@@ -76,6 +76,7 @@ function App() {
             <Route exact path="/blog" element={<BlogView/>} />
             <Route exact path="/blog/detail" element={<BlogDetailView/>} />
             <Route exact path="/500" element={<InternalServerErrorView/>} />
+            <Route path="/category/:categoryId" element={<ProductListView />} />
             <Route path="*" element={<NotFoundView/>} />
           </Routes>
         </Suspense>

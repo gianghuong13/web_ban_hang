@@ -1,5 +1,5 @@
-import React, { lazy, Component } from "react";
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import Paging from "../../components/Paging";
 import Breadcrumb from "../../components/Breadcrumb";
@@ -14,36 +14,67 @@ import CardServices from "../../components/card/CardServices";
 import CardProductGrid from "../../components/card/CardProductGrid";
 import CardProductList from "../../components/card/CardProductList";
 
-class ProductListView extends Component {
-  state = {
-    currentProducts: [],
-    currentPage: null,
-    totalPages: null,
-    totalItems: 0,
-    view: "list",
+const ProductListView = () => {
+  const [allProducts, setAllProducts] = useState([]);
+  const [currentProducts, setCurrentProducts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(null);
+  const [totalItems, setTotalItems] = useState(0);
+  const [view, setView] = useState("list");
+  const { categoryId } = useParams();
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [minPrice, setMinPrice] = useState(null);
+  const [maxPrice, setMaxPrice] = useState(null);
+  const pageLimit = 9;
+
+  const handlePriceChange = (min, max) => {
+    setMinPrice(min);
+    setMaxPrice(max);
   };
 
-  onChangeView = (view) => {
-    this.setState({ view });
-  };
-
-  componentDidMount() {
-    this.fetchProducts();
-  }
-
-  fetchProducts = async () => {
+  // Fetch products from the API
+  const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/products');
+      const response = await axios.get(`http://localhost:3001/api/products`);
       const products = response.data;
-      this.setState({ currentProducts: products });
+      setAllProducts(products);
+      // Assuming the first page is being fetched initially
+      setCurrentProducts(products.slice(0, pageLimit));
+      setTotalItems(products.length);
+      setTotalPages(Math.ceil(products.length / pageLimit));
     } catch (err) {
       console.error(err);
     }
-    
   };
- 
-  render() {
-     console.log(this.state.currentProducts);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [])
+
+
+  useEffect(() => {
+    // Apply filters and slice for pagination only if allProducts is not empty
+    if (allProducts.length > 0) {
+      let filteredProducts = allProducts;
+      if (categoryId) {
+        filteredProducts = filteredProducts.filter(product => product.category_id === categoryId);
+      }
+      if (minPrice !== null && maxPrice !== null) {
+        filteredProducts = filteredProducts.filter(product =>
+          product.price.price >= minPrice && product.price.price <= maxPrice
+        );
+      }
+      const start = (currentPage - 1) * pageLimit;
+      const end = start + pageLimit;
+      setCurrentProducts(filteredProducts.slice(start, end));
+      setTotalItems(filteredProducts.length); // Update totalItems with the length of the filteredProducts array
+    }
+  }, [allProducts, categoryId, minPrice, maxPrice, currentPage]);
+
+  useEffect(() => {
+    setTotalPages(Math.ceil(filteredProducts.length / pageLimit));
+  }, [filteredProducts]);
+
     return (
       <React.Fragment>
         <div className="p-5 bg-primary bs-cover" style={{backgroundImage: "url(../../images/banner/fashions.webp)"}}>
@@ -56,7 +87,7 @@ class ProductListView extends Component {
           <div className="row">
             <div className="col-md-3">
               <FilterCategory />
-              <FilterPrice />
+              <FilterPrice onPriceChange={handlePriceChange} />
               <FilterSize />
               <FilterStar />
               <FilterColor />
@@ -68,8 +99,8 @@ class ProductListView extends Component {
               <div className="row">
                 <div className="col-7">
                   <span className="align-middle fw-bold">
-                    {this.state.totalItems} results for{" "}
-                    <span className="text-warning">"t-shirts"</span>
+                    {totalItems} results for{" "}
+                    <span className="text-warning">"products"</span>
                   </span>
                 </div>
                 <div className="col-5 d-flex justify-content-end">
@@ -84,27 +115,19 @@ class ProductListView extends Component {
                     <option value={4}>Price high to low</option>
                   </select>
                   <div className="btn-group ms-3" role="group">
-                    <button
+                  <button
                       aria-label="Grid"
                       type="button"
-                      onClick={() => this.onChangeView("grid")}
-                      className={`btn ${
-                        this.state.view === "grid"
-                          ? "btn-primary"
-                          : "btn-outline-primary"
-                      }`}
+                      onClick={() => setView("grid")}
+                      className={`btn ${view === "grid" ? "btn-primary" : "btn-outline-primary"}`}
                     >
                       <i className="bi bi-grid" />
                     </button>
                     <button
                       aria-label="List"
                       type="button"
-                      onClick={() => this.onChangeView("list")}
-                      className={`btn ${
-                        this.state.view === "list"
-                          ? "btn-primary"
-                          : "btn-outline-primary"
-                      }`}
+                      onClick={() => setView("list")}
+                      className={`btn ${view === "list" ? "btn-primary" : "btn-outline-primary"}`}
                     >
                       <i className="bi bi-list" />
                     </button>
@@ -113,8 +136,8 @@ class ProductListView extends Component {
               </div>
               <hr />
               <div className="row g-3">
-                {this.state.view === "grid" &&
-                  this.state.currentProducts.map((product, idx) => {
+                {view === "grid" &&
+                  currentProducts.map((product, idx) => {
                     return (
                       <div key={idx} className="col-md-4">
                         <Link to={`/product/${product._id}`}>
@@ -123,8 +146,8 @@ class ProductListView extends Component {
                       </div>
                     );
                   })}
-                  {this.state.view === "list" &&
-                    this.state.currentProducts.map((product, idx) => {
+                  {view === "list" &&
+                    currentProducts.map((product, idx) => {
                       return (
                         <div key={idx} className="col-md-12">
                             <CardProductList data={product} />
@@ -134,19 +157,18 @@ class ProductListView extends Component {
               </div>
               <hr />
               <Paging
-                totalRecords={this.state.totalItems}
+                totalRecords={totalItems}
                 pageLimit={9}
                 pageNeighbours={3}
-                onPageChanged={this.onPageChanged}
                 sizing=""
                 alignment="justify-content-center"
+                onPageChanged={(data) => setCurrentPage(data.currentPage)}
               />
             </div>
           </div>
         </div>
       </React.Fragment>
     );
-  }
-}
+};
 
 export default ProductListView;

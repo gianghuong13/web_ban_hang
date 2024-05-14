@@ -11,6 +11,7 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const { ProductModel } = require('./Product');
 
+
 const mongoUrl = 'mongodb+srv://commercial:05timE2NuctQg0Yy@cluster0.wfto06b.mongodb.net/things?retryWrites=true&w=majority&appName=Cluster0';
 
 const db  = mysql.createPool({
@@ -393,6 +394,55 @@ app.post('/account/:userId/address', async (req, res) => {
 });
 });
 
+app.put('/account/:userId/address/:addressId/primary', (req, res) => {
+  if (!req.session.user_id) {
+    // No user is logged in, return an error message
+    res.status(401).json({ valid: false, message: 'Not authenticated' });
+    return;
+  }
+
+  const userId = req.params.userId;
+  const addressId = req.params.addressId;
+
+  // First, set any primary address to non-primary
+  const updateQuery = 'UPDATE address SET `primary` = 0 WHERE user_id = ? AND `primary` = 1';
+  db.query(updateQuery, [userId], (err, results) => {
+    if (err) {
+      res.status(500).json({ message: err.toString() });
+      return;
+    }
+
+    // Then, set the selected address to primary
+    const setPrimaryQuery = 'UPDATE address SET `primary` = 1 WHERE user_id = ? AND address_id = ?';
+    db.query(setPrimaryQuery, [userId, addressId], (err, results) => {
+      if (err) {
+        res.status(500).json({ message: err.toString() });
+        return;
+      }
+
+      if (results.affectedRows === 0) {
+        res.status(404).json({ message: 'Address not found' });
+      } else {
+        res.status(200).json({ message: 'Address updated successfully' });
+      }
+    });
+  });
+});
+
+app.delete('/account/address/remove/:addressId', (req, res) => {
+  const addressId = req.params.addressId;
+  const deleteQuery = 'DELETE FROM address WHERE address_id = ?';
+  db.query(deleteQuery, [addressId], (err, result) => {
+    if (err) {
+      console.error('Error deleting address:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else {
+      res.status(200).json({ message: 'Address removed successfully' });
+    }
+  });
+});
+
+
 app.get('/api/categories', (req, res) => {
   res.json(categories);
 });
@@ -405,10 +455,10 @@ mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Error connecting to MongoDB:', err));
 
-app.get('/api/cart/:userId', (req, res) => {
-  const userId = req.params.userId;
-  const query = 'SELECT * FROM carts WHERE cart_id = ?';
-  db.query(query, [userId], (err, results) => {
+  app.get('/api/cart/:cartId', (req, res) => {
+    const cartId = req.params.cartId;
+    const query = 'SELECT * FROM carts WHERE cart_id = ?';
+    db.query(query, [cartId], (err, results) => {
     if (err) {
       console.error('Error fetching user cart:', err);
       res.status(500).json({ error: 'Internal server error' });
@@ -418,10 +468,10 @@ app.get('/api/cart/:userId', (req, res) => {
   });
 });
 
-app.get('/api/cartdetails/:userId', (req, res) => {
-  const userId = req.params.userId;
+app.get('/api/cartdetails/:cartId', (req, res) => {
+  const cartId = req.params.cartId;
   const query = 'SELECT * FROM cartdetails WHERE cart_id = ?';
-  db.query(query, [userId], (err, results) => {
+  db.query(query, [cartId], (err, results) => {
     if (err) {
       console.error('Error fetching user cart:', err);
       res.status(500).json({ error: 'Internal server error' });
@@ -431,7 +481,6 @@ app.get('/api/cartdetails/:userId', (req, res) => {
   });
 });
 
-// Route to create user cart in MySQL
 app.post('/api/cart/:userId/add-item', async (req, res) => {
   const userId = req.params.userId;
   const { productId, quantity, note } = req.body;
@@ -445,77 +494,78 @@ app.post('/api/cart/:userId/add-item', async (req, res) => {
     }
     const price = product.price.price;
     // Check if the cart already exists for the user
-    const checkQuery = 'SELECT * FROM carts WHERE cart_id = ?';
+    const checkQuery = 'SELECT * FROM carts WHERE user_id = ? AND status = 1';
     db.query(checkQuery, [userId], async (err, results) => {
       if (err) {
         console.error('Error checking user cart:', err);
         return res.status(500).json({ error: 'Internal server error' });
       }
 
+      let cartId;
       if (results.length > 0) {
-        // Cart exists, check if the product is already in the cart
-        const checkProductQuery = 'SELECT * FROM cartdetails WHERE cart_id = ? AND product_id = ? AND note = ?';
-        db.query(checkProductQuery, [userId, productId, note], (err, productResults) => {
-          if (err) {
-            console.error('Error checking product in cart:', err);
-            return res.status(500).json({ error: 'Error checking product in cart' });
-          }
-
-          if (productResults.length > 0) {
-            // Product is already in the cart, update the quantity
-            const updateQuery = 'UPDATE cartdetails SET quantity = quantity + ?, priceEach = ?, note = ? WHERE cart_id = ? AND product_id = ? AND note = ?';
-            db.query(updateQuery, [quantity, price, note, userId, productId, note], (err, result) => {
-              if (err) {
-                console.error('Error updating cart:', err);
-                return res.status(500).json({ error: 'Error updating cart' });
-              }
-              res.status(200).json({ message: 'Cart updated successfully' });
-            });
-          } else {
-            // Product is not in the cart, add it
-            const insertQuery = 'INSERT INTO cartdetails (cart_id, product_id, quantity, priceEach, note) VALUES (?, ?, ?, ?, ?)';
-            db.query(insertQuery, [userId, productId, quantity, price, note], (err, result) => {
-              if (err) {
-                console.error('Error adding product to cart:', err);
-                return res.status(500).json({ error: 'Error adding product to cart' });
-              }
-              res.status(201).json({ message: 'Product added to cart successfully' });
-            });
-          }
-        });
+        // Cart exists, use its id
+        cartId = results[0].cart_id;
+        checkProductAndInsert(cartId);
       } else {
         // Cart doesn't exist, create a new one
-        const insertCartQuery = 'INSERT INTO carts (cart_id, user_id, createdAt, status) VALUES (?, ?, NOW(), ?)';
-        db.query(insertCartQuery, [userId, userId, 'active'], (err, result) => {
+        const insertCartQuery = 'INSERT INTO carts (user_id, createdAt, status) VALUES (?, NOW(), ?)';
+        db.query(insertCartQuery, [userId, 1], (err, result) => {
           if (err) {
             console.error('Error creating cart:', err);
             return res.status(500).json({ error: 'Error creating cart' });
           }
+          // Get the ID of the newly inserted cart
+          cartId = result.insertId;
+          checkProductAndInsert(cartId);
+        });
+      }
+    });
 
-          // Add the product to the cart
-          const insertProductQuery = 'INSERT INTO cartdetails (cart_id, product_id, quantity, priceEach, note) VALUES (?, ?, ?, ?, ?)';
-          db.query(insertProductQuery, [userId, productId, quantity, price, note], (err, result) => {
+    function checkProductAndInsert(cartId) {
+      // Now we have a valid cartId, either from an existing cart or a new one
+      // Check if the product is already in the cart
+      const checkProductQuery = 'SELECT * FROM cartdetails WHERE cart_id = ? AND product_id = ? AND note = ?';
+      db.query(checkProductQuery, [cartId, productId, note], (err, productResults) => {
+        if (err) {
+          console.error('Error checking product in cart:', err);
+          return res.status(500).json({ error: 'Error checking product in cart' });
+        }
+
+        if (productResults.length > 0) {
+          // Product is already in the cart, update the quantity
+          const updateQuery = 'UPDATE cartdetails SET quantity = quantity + ?, priceEach = ?, note = ? WHERE cart_id = ? AND product_id = ? AND note = ?';
+          db.query(updateQuery, [quantity, price, note, cartId, productId, note], (err, result) => {
+            if (err) {
+              console.error('Error updating cart:', err);
+              return res.status(500).json({ error: 'Error updating cart' });
+            }
+            res.status(200).json({ message: 'Cart updated successfully' });
+          });
+        } else {
+          // Product is not in the cart, add it
+          const insertQuery = 'INSERT INTO cartdetails (cart_id, product_id, quantity, priceEach, note) VALUES (?, ?, ?, ?, ?)';
+          db.query(insertQuery, [cartId, productId, quantity, price, note], (err, result) => {
             if (err) {
               console.error('Error adding product to cart:', err);
               return res.status(500).json({ error: 'Error adding product to cart' });
             }
-            res.status(201).json({ message: 'Cart created and product added successfully' });
+            res.status(201).json({ message: 'Product added to cart successfully' });
           });
-        });
-      }
-    });
+        }
+      });
+    }
   } catch (error) {
     console.error('Error retrieving product details:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 // Route to update user cart in MySQL
-app.put('/api/cart/:userId/update-item/:detailsId', (req, res) => {
-  const userId = req.params.userId;
+app.put('/api/cart/:cartId/update-item/:detailsId', (req, res) => {
+  const cartId = req.params.cartId;
   const detailsId = req.params.detailsId;
   const { quantity } = req.body;
   const updateQuery = 'UPDATE cartdetails SET quantity = ? WHERE cartdetails_id = ? AND cart_id = ?';
-  db.query(updateQuery, [quantity, detailsId, userId], (err, result) => {
+  db.query(updateQuery, [quantity, detailsId, cartId], (err, result) => {
     if (err) {
       console.error('Error updating item quantity in user cart:', err);
       res.status(500).json({ error: 'Internal server error' });
@@ -538,6 +588,19 @@ app.get('/api/user_cart/:userId', (req, res) => {
   });
 });
 
+app.put('/api/user_cart/:cartId/primary/', (req, res) => {
+  const cartId = req.params.cartId;
+  const updateQuery = 'UPDATE carts SET status = 0 WHERE cart_id = ?';
+  db.query(updateQuery, [cartId], (err, result) => {
+    if (err) {
+      console.error('Error updating cart status:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    } else {
+      res.status(200).json({ message: 'Cart status updated successfully' });
+    }
+  });
+});
+
 app.get('/api/checkout/:userId', (req, res) => {
   const userId = req.params.userId;
   const query = `SELECT * FROM user_profile_view WHERE user_id = ?`;
@@ -552,10 +615,11 @@ app.get('/api/checkout/:userId', (req, res) => {
 });
 
 // Route to delete user cart from MySQL
-app.delete('/api/cart/remove-item/:detailsId', (req, res) => {
+app.delete('/api/cart/:cartId/remove-item/:detailsId', (req, res) => {
+  const cartId = req.params.cartId;
   const detailsId = req.params.detailsId;
-  const deleteQuery = 'DELETE FROM cartdetails WHERE cartdetails_id = ?';
-  db.query(deleteQuery, [detailsId], (err, result) => {
+  const deleteQuery = 'DELETE FROM cartdetails WHERE cartdetails_id = ? AND cart_id = ?';
+  db.query(deleteQuery, [detailsId, cartId], (err, result) => {
     if (err) {
       console.error('Error deleting item from user cart:', err);
       res.status(500).json({ error: 'Internal server error' });
@@ -567,15 +631,26 @@ app.delete('/api/cart/remove-item/:detailsId', (req, res) => {
 
 app.get('/cart/total/:cartId', (req, res) => {
   const cartId = req.params.cartId;
-
   db.getConnection((err, connection) => {
-    if(err) throw err;
-
+    if(err) {
+      console.error('Error getting database connection:', err);
+      res.status(500).json({ error: 'Error getting database connection' });
+      return;
+    }
     connection.query('CALL CalculateCartTotal(?, @totalAmount)', [cartId], (err, results) => {
-      if(err) throw err;
+      if(err) {
+        console.error('Error calling CalculateCartTotal:', err);
+        res.status(500).json({ error: 'Error calculating cart total' });
+        connection.release();
+        return;
+      }
       connection.query('SELECT @totalAmount AS totalAmount', (err, results) => {
         connection.release(); 
-        if(err) throw err;
+        if(err) {
+          console.error('Error getting totalAmount:', err);
+          res.status(500).json({ error: 'Error getting cart total' });
+          return;
+        }
         res.send(results[0]);
       });
     });
