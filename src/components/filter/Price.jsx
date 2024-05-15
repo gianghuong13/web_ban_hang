@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from "react";
 
 const FilterPrice = ({ onPriceChange }) => {
-
-  const [selectedRanges, setSelectedRanges] = useState([]);
+  const [selectedRanges, setSelectedRanges] = useState(() => {
+    // Retrieve selected ranges from local storage
+    const savedRanges = localStorage.getItem("selectedRanges");
+    return savedRanges ? JSON.parse(savedRanges) : [];
+  });
 
   const handleCheckboxChange = (event) => {
     const [minPrice, maxPrice] = event.target.value.split('-').map(price => parseFloat(price));
+    let updatedRanges;
     if (event.target.checked) {
-      setSelectedRanges(prevRanges => [...prevRanges, { minPrice, maxPrice }]);
+      updatedRanges = [...selectedRanges, { minPrice, maxPrice }];
     } else {
-      setSelectedRanges(prevRanges => prevRanges.filter(range => range.minPrice !== minPrice && range.maxPrice !== maxPrice));
+      updatedRanges = selectedRanges.filter(range => range.minPrice !== minPrice || range.maxPrice !== maxPrice);
     }
+    setSelectedRanges(updatedRanges);
+    localStorage.setItem("selectedRanges", JSON.stringify(updatedRanges));
+
+    // Refresh the page
+    setTimeout(() => {
+      window.location.reload();
+    }, 0);
   };
 
   useEffect(() => {
@@ -23,7 +34,9 @@ const FilterPrice = ({ onPriceChange }) => {
     }
   }, [selectedRanges, onPriceChange]);
 
-
+  const isChecked = (minPrice, maxPrice) => {
+    return selectedRanges.some(range => range.minPrice === minPrice && range.maxPrice === maxPrice);
+  };
 
   return (
     <div className="card mb-3">
@@ -45,6 +58,7 @@ const FilterPrice = ({ onPriceChange }) => {
               id="flexCheckDefault1"
               value="1-25"
               onChange={handleCheckboxChange}
+              checked={isChecked(1, 25)}
             />
             <label className="form-check-label" htmlFor="flexCheckDefault1">
               $1.00 - $25.00 <span className="text-muted">(4)</span>
@@ -59,6 +73,7 @@ const FilterPrice = ({ onPriceChange }) => {
               id="flexCheckDefault2"
               value="26-50"
               onChange={handleCheckboxChange}
+              checked={isChecked(26, 50)}
             />
             <label className="form-check-label" htmlFor="flexCheckDefault2">
               $26.00 - $50.00 <span className="text-muted">(2)</span>
@@ -73,6 +88,7 @@ const FilterPrice = ({ onPriceChange }) => {
               id="flexCheckDefault3"
               value="51-99"
               onChange={handleCheckboxChange}
+              checked={isChecked(51, 99)}
             />
             <label className="form-check-label" htmlFor="flexCheckDefault3">
               $51.00 - $99.00 <span className="text-muted">(5)</span>
@@ -84,11 +100,12 @@ const FilterPrice = ({ onPriceChange }) => {
             <input
               className="form-check-input"
               type="checkbox"
-              id="flexCheckDefault3"
+              id="flexCheckDefault4"
               value="100-1000"
               onChange={handleCheckboxChange}
+              checked={isChecked(100, 1000)}
             />
-            <label className="form-check-label" htmlFor="flexCheckDefault3">
+            <label className="form-check-label" htmlFor="flexCheckDefault4">
               $100.00 - $1000.00 <span className="text-muted">(5)</span>
             </label>
           </div>
