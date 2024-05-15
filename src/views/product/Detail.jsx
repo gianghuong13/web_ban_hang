@@ -38,6 +38,7 @@ const ProductDetailView = () => {
   const [reviewCount, setReviewCount] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [stock, setStock] = useState(1);
 
 
   useEffect(() => {
@@ -53,6 +54,7 @@ const ProductDetailView = () => {
         setSizes(response.data.sizes);
         setColors(response.data.colors);
         setImgLink(response.data.img);
+        setStock(response.data.stock);
       } catch (error) {
         console.error(error);
       }
@@ -70,8 +72,13 @@ const addToCart = () => {
         setIsLoggedIn(true);
         setUserId(response.data.user_id);
         console.log('User ID:', response.data.user_id);
+        if (quantity > stock) {
+          setIsLoading(false);
+          alert('Quantity exceeds stock');
+          return;
+        }
         const note = `Size: ${selectedSize}, Color: ${selectedColor}`;
-        console.log('Adding product to cart:', productId, quantity, note); // Use product._id here
+        console.log('Adding product to cart:', productId, quantity, note);
         axios.post(`http://localhost:5000/api/cart/${response.data.user_id}/add-item`, { productId: productId, quantity: quantity, note }) // And here
           .then(response => {
             setIsLoading(false);
@@ -147,45 +154,50 @@ const handleQuantityChange = (event) => {
                 <span className="text-muted small">
                 <div>Number of reviews: {reviewCount}</div>
                 </span>
+                <span className="text-muted small">
+                <div>Stock: {stock}</div>
+                </span>
               </div>
               <dl className="row small mb-3">
                 <dt className="col-sm-3">Availability</dt>
                 <dd className="col-sm-9">In stock</dd>
                 <dt className="col-sm-3">Size</dt>
                 <dd className="col-sm-9">
-                  {sizes.map((size, index) => (
-                    <div className="form-check form-check-inline" key={index}>
-                      <input
-                        className="form-check-input"
-                        type="radio"
-                        name="size"
-                        id={`size-${index}`}
-                        value={size}
-                        onChange={(e) => setSelectedSize(e.target.value)} // Add this line
-                      />
-                      <label className="form-check-label" htmlFor={`size-${index}`}>
-                        {size}
-                      </label>
-                    </div>
-                  ))}
-                </dd>
-                <dd className="col-sm-9">
-                  {colors.map((color, index) => (
-                    <div key={index} className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="radio"
-                        name="colorOptions"
-                        id={`color${index}`}
-                        value={color}
-                        onChange={(e) => setSelectedColor(e.target.value)} // Add this line
-                      />
-                      <label className="form-check-label" htmlFor={`color${index}`}>
-                        {color}
-                      </label>
-                    </div>
-                  ))}
-                </dd>
+                {sizes.map((size, index) => (
+                  <div className="form-check form-check-inline" key={index}>
+                    <input
+                      className="form-check-input"
+                      type="radio"
+                      name="size"
+                      id={`size-${index}`}
+                      value={size}
+                      onChange={(e) => setSelectedSize(e.target.value)}
+                      disabled={stock === 0} // Add this line
+                    />
+                    <label className="form-check-label" htmlFor={`size-${index}`}>
+                      {size}
+                    </label>
+                  </div>
+                ))}
+              </dd>
+              <dd className="col-sm-9">
+                {colors.map((color, index) => (
+                  <div key={index} className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="radio"
+                      name="colorOptions"
+                      id={`color${index}`}
+                      value={color}
+                      onChange={(e) => setSelectedColor(e.target.value)}
+                      disabled={stock === 0} // Add this line
+                    />
+                    <label className="form-check-label" htmlFor={`color${index}`}>
+                      {color}
+                    </label>
+                  </div>
+                ))}
+              </dd>
               </dl>
 
               <div className="mb-3">
@@ -201,6 +213,7 @@ const handleQuantityChange = (event) => {
                     <button
                       className="btn btn-primary text-white"
                       type="button"
+                      disabled={stock === 0}
                     >
                       <i className="bi bi-dash-lg"></i>
                     </button>
@@ -209,10 +222,12 @@ const handleQuantityChange = (event) => {
                         value={quantity} 
                         onChange={handleQuantityChange} 
                         style={{width: '50px'}} 
-                      />
+                        disabled={stock === 0}
+                    />
                     <button
                       className="btn btn-primary text-white"
                       type="button"
+                      disabled={stock === 0}
                     >
                       <i className="bi bi-plus-lg"></i>
                     </button>
@@ -223,7 +238,7 @@ const handleQuantityChange = (event) => {
                     disabled={!selectedSize || !selectedColor}
                     onClick={addToCart}
                   >
-                    Add to Cart
+                    {stock === 0 ? 'Out of Stock' : 'Add to Cart'}
                   </button>
               </div>
             </div>
