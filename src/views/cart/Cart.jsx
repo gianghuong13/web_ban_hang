@@ -75,6 +75,38 @@ const CartView = () => {
     alert(JSON.stringify(values));
   };
 
+  const handleCheckout = async () => {
+    let hasError = false;
+  
+    // Calculate the total quantity of each product in the cart
+    const productQuantities = cartData.reduce((quantities, item) => {
+      quantities[item.product_id] = (quantities[item.product_id] || 0) + item.quantity;
+      return quantities;
+    }, {});
+  
+    for (const [productId, totalQuantity] of Object.entries(productQuantities)) {
+      try {
+        const productResponse = await axios.get(`http://localhost:3001/api/product/${productId}`);
+        const productStock = productResponse.data.stock;
+  
+        if (totalQuantity > productStock) {
+          alert(`The total quantity of one (or more) product(s) in the cart exceeds the stock.`);
+          hasError = true;
+          break;
+        }
+      } catch (error) {
+        console.error('Error fetching product details:', error);
+        console.log('An error occurred while checking the product stock.');
+        hasError = true;
+        break;
+      }
+    }
+  
+    if (!hasError) {
+      window.location.href = '/checkout'
+    }
+  };
+
   const deleteItem = (detailsId) => {
     axios.delete(`http://localhost:5000/api/cart/${cartId}/remove-item/${detailsId}`)
     .then((response) => {
@@ -171,9 +203,6 @@ const CartView = () => {
                                 <small className="d-block text-muted">${item.priceEach}</small>
                               </td>
                               <td className="text-end">
-                                <button className="btn btn-sm btn-outline-secondary me-2">
-                                  <i className="bi bi-heart-fill"></i>
-                                </button>
                                 <button className="btn btn-sm btn-outline-danger" onClick={() => deleteItem(item.cartdetails_id)}>
                                   <i className="bi bi-trash"></i>
                                 </button>
@@ -185,9 +214,9 @@ const CartView = () => {
                     </table>
                   </div>
                   <div className="card-footer">
-                    <Link to="/checkout" className="btn btn-primary float-end">
+                  <button onClick={handleCheckout} className="btn btn-primary float-end">
                       Make Purchase <i className="bi bi-chevron-right"></i>
-                    </Link>
+                    </button>
                     <Link to="/" className="btn btn-secondary">
                       <i className="bi bi-chevron-left"></i> Continue shopping
                     </Link>

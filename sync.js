@@ -20,7 +20,7 @@ mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
         const productsCollection = mongoose.connection.collection('products');
 
         // Set up change stream
-        const changeStream = productsCollection.watch();
+        const changeStream = productsCollection.watch([], { fullDocument: 'updateLookup' });
         console.log('Change stream set up');
 
         changeStream.on('error', (error) => {
@@ -56,6 +56,27 @@ mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
                 });
             }   else if (change.operationType === 'insert') {
                 console.log('Inserted product:', change.documentKey._id);
+            }   else if (change.operationType === 'update') {
+                const updatedProduct = change.fullDocument;
+                console.log(change.fullDocument)
+                // Check if stock reaches 0 and available is true
+                if (updatedProduct.stock === 0 && updatedProduct.available) {
+                    try {
+                        // Update the document to set available to false
+                        await productsCollection.updateOne({ _id: updatedProduct._id }, { $set: { available: false } });
+                        console.log(`Product ${updatedProduct._id} is now unavailable.`);
+                    } catch (error) {
+                        console.error('Error updating product in MongoDB:', error);
+                    }
+                } else if (updatedProduct.stock > 0 && !updatedProduct.available) {
+                    try {
+                        // Update the document to set available to true
+                        await productsCollection.updateOne({ _id: updatedProduct._id }, { $set: { available: true } });
+                        console.log(`Product ${updatedProduct._id} is now available.`);
+                    } catch (error) {
+                        console.error('Error updating product in MongoDB:', error);
+                    }
+                }
             }
         });
     })
