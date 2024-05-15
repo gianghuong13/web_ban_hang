@@ -33,6 +33,7 @@ const CartView = () => {
                   .then(productResponse => {
                     // Add product details to the item
                     item.productDetails = productResponse.data;
+                    console.log(item.productDetails.img);
                     return item;
                   })
                   .catch(error => {
@@ -158,12 +159,15 @@ const CartView = () => {
                       <tbody>
                       {cartData.map((item, index) => {
                         console.log(item);
+                        console.log("image: " + item.productDetails.image);
                         return (
                           <tr key={index}>
                             <td>
                               <div className="row">
                                 <div className="col-3 d-none d-md-block">
-                                  <img src={item.productDetails ? item.productDetails.image : ''} width="80" alt="..." />
+                                  <Link to={`/product/detail/${item.product_id}`}>
+                                    <img src={item.productDetails.img[0]} width="125" alt="..." />
+                                  </Link>
                                 </div>
                                 <div className="col">
                                   <Link to={`/product/detail/${item.product_id}`} className="text-decoration-none">
@@ -177,29 +181,23 @@ const CartView = () => {
                             </td>
                               <td>
                                 <div className="input-group input-group-sm mw-140">
-                                <button 
-                                    className="btn btn-primary text-white" 
-                                    type="button" 
-                                    onClick={() => item.quantity > 1 && updateQuantity(item.cartdetails_id, item.quantity - 1)}
-                                  >
-                                    <i className="bi bi-dash-lg"></i>
-                                  </button>
-                                  <input 
-                                    type="number" 
-                                    className="form-control" 
-                                    value={item.quantity} 
-                                    min="1"
-                                    onChange={(e) => updateQuantity(item.cartdetails_id, Number(e.target.value))}
-                                  />
-                                  <button 
-                                    className="btn btn-primary text-white" 
-                                    type="button" 
-                                    onClick={() => updateQuantity(item.cartdetails_id, item.quantity + 1)}
-                                  >
-                                    <i className="bi bi-plus-lg"></i>
-                                  </button>
-                                </div>
-                              </td>
+                                    <button 
+                                      className="btn btn-primary text-white" 
+                                      type="button" 
+                                      onClick={() => item.quantity > 1 && updateQuantity(item.cartdetails_id, item.quantity - 1)}
+                                    >
+                                      <i className="bi bi-dash-lg"></i>
+                                    </button>
+                                    <span className="form-control" style={{textAlign: 'center'}}>{item.quantity}</span>
+                                    <button 
+                                      className="btn btn-primary text-white" 
+                                      type="button" 
+                                      onClick={() => updateQuantity(item.cartdetails_id, item.quantity + 1)}
+                                    >
+                                      <i className="bi bi-plus-lg"></i>
+                                    </button>
+                                  </div>
+                                </td>
                               <td>
                                 <var className="price">{item.price}</var>
                                 <small className="d-block text-muted">${item.priceEach}</small>
