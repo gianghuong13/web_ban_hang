@@ -173,9 +173,6 @@ const CartView = () => {
                                 <small className="d-block text-muted">${item.priceEach}</small>
                               </td>
                               <td className="text-end">
-                                <button className="btn btn-sm btn-outline-secondary me-2">
-                                  <i className="bi bi-heart-fill"></i>
-                                </button>
                                 <button className="btn btn-sm btn-outline-danger" onClick={() => deleteItem(item.cartdetails_id)}>
                                   <i className="bi bi-trash"></i>
                                 </button>

@@ -703,8 +703,27 @@ app.post('/api/order/:userId/add', (req, res) => {
           console.error('Error adding order details:', err);
           return res.status(500).json({ error: 'Error adding order details' });
         }
-
-        res.status(201).json({ message: 'Order and order details added successfully' });
+    
+        // Count the amount of each distinct productId
+        const productCounts = orderDetailsData.reduce((counts, detail) => {
+          const productId = detail[1];
+          const quantityOrdered = detail[3];
+          counts[productId] = (counts[productId] || 0) + quantityOrdered;
+          return counts;
+        }, {});
+    
+        res.status(201).json({ message: 'Order and order details added successfully', productCounts: productCounts });
+    
+        // Update stock in MongoDB
+        for (const [productId, quantityOrdered] of Object.entries(productCounts)) {
+          ProductModel.updateOne({ _id: productId }, { $inc: { stock: -quantityOrdered } })
+            .then(res => {
+              console.log(`Stock updated for product ${productId}`);
+            })
+            .catch(err => {
+              console.error(`Error updating stock for product ${productId}:`, err);
+            });
+          }
       });
     });
   });
