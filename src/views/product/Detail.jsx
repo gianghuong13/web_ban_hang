@@ -103,8 +103,10 @@ const handleNextImage = () => {
   setCurrentImageIndex((currentImageIndex + 1) % (product ? product.img.length : 1));
 };
 
-const handleQuantityChange = (event) => {
-  setQuantity(event.target.value);
+const handleQuantityChange = (newQuantity) => {
+  if (newQuantity >= 0) { // prevent negative quantity
+    setQuantity(newQuantity);
+  }
 };
 
   return (
@@ -201,18 +203,15 @@ const handleQuantityChange = (event) => {
                     <button
                       className="btn btn-primary text-white"
                       type="button"
+                      onClick={() => handleQuantityChange(quantity - 1)}
                     >
                       <i className="bi bi-dash-lg"></i>
                     </button>
-                    <input 
-                        type="number" 
-                        value={quantity} 
-                        onChange={handleQuantityChange} 
-                        style={{width: '50px'}} 
-                      />
+                    <span style={{width: '50px', textAlign: 'center'}}>{quantity}</span>
                     <button
                       className="btn btn-primary text-white"
                       type="button"
+                      onClick={() => handleQuantityChange(quantity + 1)}
                     >
                       <i className="bi bi-plus-lg"></i>
                     </button>
