@@ -24,8 +24,10 @@ const RatingsReviews = (props) => {
         const promises = userIds.map(async (userId) => {
           const userResponse = await axios.get(`http://localhost:5000/api/checkout/${userId}`);
           if (userResponse.data[0]) {
+            console.log(userResponse.data[0]);
             newUserNames[userId] = `${userResponse.data[0].first_name} ${userResponse.data[0].last_name}`;
           } else {
+            newUserNames[userId] = "User has been deleted";
             console.log(`No data returned for user ID ${userId}`);
           }
         });
@@ -87,6 +89,7 @@ const RatingsReviews = (props) => {
         {errorMessage}
       </div>
     )}
+      {isLoggedIn ? (
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="rating">Rating:</label>
@@ -102,6 +105,9 @@ const RatingsReviews = (props) => {
           </div>
           <button type="submit" className="btn btn-primary">Submit Review</button>
         </form>
+      ) : (
+        <p>You must be logged in to submit a review.</p>
+      )}
     </div>
   );
 };

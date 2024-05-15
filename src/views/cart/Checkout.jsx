@@ -32,6 +32,15 @@ const CheckoutView = () => {
           setUserId(userId);
           axios.get(`http://localhost:5000/api/user_cart/${userId}`)
             .then(response => {
+              console.log(`cartid in respnse.data is ${response.data[0].cart_id}`);
+              setCartId(response.data[0].cart_id);
+              const cartId = response.data[0].cart_id;
+              console.log(`cartId is: ${cartId}`);
+              axios.get(`http://localhost:5000/cart/total/${cartId}`)
+                .then(response => {
+                  console.log('Total amount:', response.data.totalAmount);
+                  setTotalAmount(response.data.totalAmount);
+                });
               const cartItems = response.data.map(item => {
                 return axios.get(`http://localhost:3001/api/product/${item.product_id}`)
                   .then(productResponse => {
@@ -55,11 +64,6 @@ const CheckoutView = () => {
             })
             .catch(error => {
               console.error(error);
-            });
-
-          axios.get(`http://localhost:5000/cart/total/${userId}`)
-            .then(response => {
-              setTotalAmount(response.data.totalAmount);
             });
 
           axios.get(`http://localhost:5000/account/${userId}/addresses`, { withCredentials: true }) // Fetch addresses

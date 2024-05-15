@@ -44,22 +44,6 @@ const CardProductGrid = (props) => {
             ))}
           </span>
         </div>
-        <div className="btn-group  d-flex" role="group">
-          <button
-            type="button"
-            className="btn btn-sm btn-primary"
-            title="Add to cart"
-          >
-            <i className="bi bi-cart-plus" />
-          </button>
-          <button
-            type="button"
-            className="btn btn-sm btn-outline-secondary"
-            title="Add to wishlist"
-          >
-            <i className="bi bi-heart-fill" />
-          </button>
-        </div>
       </div>
     </div>
   );

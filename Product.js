@@ -118,6 +118,11 @@ function transformProductData(productData) {
       review.review = productData.review.review;
     }
   }
+  let averageRating = 0;
+  if (productData.review && Array.isArray(productData.review.rating) && productData.review.rating.length > 0) {
+    const sum = productData.review.rating.reduce((a, b) => a + b, 0);
+    averageRating = parseFloat((sum / productData.review.rating.length).toFixed(2));
+  }
   return {
     id: productData.id || "", // Use the _id field
     category_id: productData.category_id || "", // Use the category_id field
@@ -133,7 +138,8 @@ function transformProductData(productData) {
     description: productData.description || "", // Use the description field
     name: productData.name || "", // Use the name field
     img: imgLinks,
-    review: review
+    review: review,
+    averageRating: averageRating
   };
 }
 

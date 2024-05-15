@@ -35,6 +35,9 @@ const ProductDetailView = () => {
   const [imgLink, setImgLink] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [reviewCount, setReviewCount] = useState(0);
+  const [averageRating, setAverageRating] = useState(0);
+  const [quantity, setQuantity] = useState(1);
 
 
   useEffect(() => {
@@ -43,7 +46,10 @@ const ProductDetailView = () => {
         console.log('Fetching product:', id);
         const response = await axios.get(`http://localhost:3001/api/product/${id}`);
         setProduct(response.data);
-        setProductId(response.data._id);
+        setProductId(response.data.id);
+        setReviewCount(response.data.review.review.length);
+        setAverageRating(response.data.averageRating);
+        console.log('Product:', response.data);
         setSizes(response.data.sizes);
         setColors(response.data.colors);
         setImgLink(response.data.img);
@@ -64,10 +70,9 @@ const addToCart = () => {
         setIsLoggedIn(true);
         setUserId(response.data.user_id);
         console.log('User ID:', response.data.user_id);
-        const quantity = 1;
         const note = `Size: ${selectedSize}, Color: ${selectedColor}`;
-
-        axios.post(`http://localhost:5000/api/cart/${response.data.user_id}/add-item`, { productId, quantity, note })
+        console.log('Adding product to cart:', productId, quantity, note); // Use product._id here
+        axios.post(`http://localhost:5000/api/cart/${response.data.user_id}/add-item`, { productId: productId, quantity: quantity, note }) // And here
           .then(response => {
             setIsLoading(false);
             if (response.status === 200) {
@@ -96,6 +101,10 @@ const addToCart = () => {
 
 const handleNextImage = () => {
   setCurrentImageIndex((currentImageIndex + 1) % (product ? product.img.length : 1));
+};
+
+const handleQuantityChange = (event) => {
+  setQuantity(event.target.value);
 };
 
   return (
@@ -131,16 +140,12 @@ const handleNextImage = () => {
             </div>
             <div className="col-md-7">
             <h1 className="h5 d-inline me-2">{product ? product.name : 'Loading...'}</h1>
-              <span className="badge bg-success me-2">New</span>
-              <span className="badge bg-danger me-2">Hot</span>
               <div className="mb-3">
-                <i className="bi bi-star-fill text-warning me-1" />
-                <i className="bi bi-star-fill text-warning me-1" />
-                <i className="bi bi-star-fill text-warning me-1" />
-                <i className="bi bi-star-fill text-warning me-1" />
-                <i className="bi bi-star-fill text-secondary me-1" />|{" "}
+              <span className="text-muted small">
+                <div>Rating: {averageRating}</div>
+                </span>
                 <span className="text-muted small">
-                  42 ratings and 4 reviews
+                <div>Number of reviews: {reviewCount}</div>
                 </span>
               </div>
               <dl className="row small mb-3">
@@ -199,11 +204,12 @@ const handleNextImage = () => {
                     >
                       <i className="bi bi-dash-lg"></i>
                     </button>
-                    <input
-                      type="text"
-                      className="form-control"
-                      defaultValue="1"
-                    />
+                    <input 
+                        type="number" 
+                        value={quantity} 
+                        onChange={handleQuantityChange} 
+                        style={{width: '50px'}} 
+                      />
                     <button
                       className="btn btn-primary text-white"
                       type="button"
@@ -219,13 +225,6 @@ const handleNextImage = () => {
                   >
                     Add to Cart
                   </button>
-                <button
-                  type="button"
-                  className="btn btn-sm btn-outline-secondary"
-                  title="Add to wishlist"
-                >
-                  <i className="bi bi-heart-fill"></i>
-                </button>
               </div>
             </div>
           </div>
