@@ -10,7 +10,23 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const { ProductModel } = require('./Product');
+const redis = require('redis');
 
+const redisClient = redis.createClient({host: 'localhost', // Địa chỉ của Redis server
+port: 6379,} ); 
+
+(async () => { 
+  await redisClient.connect(); 
+})(); 
+
+
+redisClient.on("ready", () => { 
+  console.log("Connected!"); 
+}); 
+
+redisClient.on("error", (err) => { 
+  console.log("Error in the Connection"); 
+}); 
 
 const mongoUrl = 'mongodb+srv://commercial:05timE2NuctQg0Yy@cluster0.wfto06b.mongodb.net/things?retryWrites=true&w=majority&appName=Cluster0';
 
@@ -52,13 +68,22 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+// app.use(session({
+//   key:'userId',
+//   secret: 'your-secret-key',
+//   resave: false,
+//   saveUninitialized: true,
+//   cookie: { secure: false,
+//   expires: 60 * 60 * 24 } // set to true if your using https
+// }));
+
 app.use(session({
-  key:'userId',
-  secret: 'your-secret-key',
+  store: new RedisStore({ client: redisClient, ttl: 3600 }), // Redis client configuration
+  key: 'userId',
+  secret: 'secret',
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false,
-  expires: 60 * 60 * 24 } // set to true if your using https
+  saveUninitialized: false,
+  cookie: { secure: false, expires: 60 * 60 * 24 } // Adjust cookie settings as needed
 }));
 
 app.get('/account/user', (req, res) => {
