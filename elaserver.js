@@ -22,7 +22,7 @@ app.use(cors());
 async function searchProducts(query) {
   try {
     const countResponse = await client.count({
-        index: 'connectproducts2',
+        index: 'productsfinal',
         body: {
             query: {
                 match: {
@@ -35,7 +35,7 @@ async function searchProducts(query) {
     const totalMatches = countResponse.count;
 
     const body = await client.search({
-      index: 'connectproducts2',
+      index: 'productsfinal',
       body: {
           query: {
               match: {

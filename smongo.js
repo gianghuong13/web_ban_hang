@@ -37,7 +37,7 @@ mongoose.connect(url)
       .catch(err => console.error('Error fetching data', err));
 
     // get products
-    mongoose.connection.db.collection('products').find({}, {
+    mongoose.connection.db.collection('products2').find({}, {
       projection: {
         _id: 1,
         name: 1,
