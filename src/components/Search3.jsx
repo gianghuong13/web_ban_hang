@@ -44,28 +44,28 @@ const Search = () => {
                 const products = response.data.map(hit => {
                     let images = [];
                     try {
-                        // Ensure the img string is a valid JSON string
                         const imgString = hit._source.img;
                         const parsedImgs = JSON.parse(imgString.replace(/'/g, '"'));
-
-                        // Extract URLs from the parsed images array
                         images = parsedImgs.map(imgObj => Object.keys(imgObj)[0]);
                         console.log('Parsed Images:', images);
                     } catch (err) {
                         console.error('Error parsing img field:', err);
-                        images = []; // Fallback to an empty array or any default value
+                        images = [];
                     }
                     return {
                         ...hit._source,
-                        id: hit._id, // Use the _id as the product id
+                        id: hit._id,
                         images: images
                     };
                 });
                 console.log('Mapped Products:', products);
                 setAllProducts(products);
-                setCurrentProducts(products.slice(0, pageLimit));
-                setTotalItems(products.length);
+                // Calculate total pages based on products length
+                const totalFilteredProducts = products.length;
+                setTotalItems(totalFilteredProducts);
                 setTotalPages(Math.ceil(products.length / pageLimit));
+                // Set current products for the first page
+                setCurrentProducts(products.slice(0, pageLimit));
             } catch (err) {
                 console.error('Error searching products in frontend:', err);
                 setAllProducts([]);
@@ -88,11 +88,12 @@ const Search = () => {
                     product.price.price >= minPrice && product.price.price <= maxPrice
                 );
             }
+            const totalFilteredProducts = filteredProducts.length;
+            setTotalItems(totalFilteredProducts);
+            setTotalPages(Math.ceil(totalFilteredProducts / pageLimit));
             const start = (currentPage - 1) * pageLimit;
             const end = start + pageLimit;
             setCurrentProducts(filteredProducts.slice(start, end));
-            setTotalItems(filteredProducts.length);
-            setTotalPages(Math.ceil(filteredProducts.length / pageLimit));
         }
     }, [allProducts, minPrice, maxPrice, currentPage]);
 
@@ -174,7 +175,7 @@ const Search = () => {
                         <hr />
                         <Paging
                             totalRecords={totalItems}
-                            currentPage={currentPage} // Ensure currentPage is passed correctly
+                            currentPage={currentPage}
                             pageLimit={pageLimit}
                             pageNeighbours={3}
                             sizing=""

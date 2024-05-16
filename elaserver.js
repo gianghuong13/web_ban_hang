@@ -21,6 +21,19 @@ app.use(cors());
 
 async function searchProducts(query) {
   try {
+    const countResponse = await client.count({
+        index: 'connectproducts2',
+        body: {
+            query: {
+                match: {
+                    name: query
+                }
+            }
+        }
+    });
+
+    const totalMatches = countResponse.count;
+
     const body = await client.search({
       index: 'connectproducts2',
       body: {
@@ -28,7 +41,8 @@ async function searchProducts(query) {
               match: {
                   name: query
               }
-          }
+          },
+          size: totalMatches
       }
   });
       if (!body) {
