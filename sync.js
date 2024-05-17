@@ -65,6 +65,27 @@ mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
                         // Update the document to set available to false
                         await productsCollection.updateOne({ _id: updatedProduct._id }, { $set: { available: false } });
                         console.log(`Product ${updatedProduct._id} is now unavailable.`);
+            
+                        // Connect to MySQL
+                        const mysqlConnection = mysql.createConnection(mysqlConfig);
+                        mysqlConnection.connect((err) => {
+                            if (err) {
+                                console.error('Error connecting to MySQL:', err);
+                                return;
+                            }
+                            console.log('Connected to MySQL');
+            
+                            // Delete corresponding entry from cartdetails table
+                            const deleteQuery = `DELETE FROM cartdetails WHERE product_id = '${updatedProduct._id}'`;
+                            mysqlConnection.query(deleteQuery, (err, result) => {
+                                if (err) {
+                                    console.error('Error executing MySQL query:', err);
+                                } else {
+                                    console.log(`Deleted entries from cartdetails for product with ID ${updatedProduct._id}`);
+                                }
+                                mysqlConnection.end();
+                            });
+                        });
                     } catch (error) {
                         console.error('Error updating product in MongoDB:', error);
                     }

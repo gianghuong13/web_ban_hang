@@ -16,9 +16,7 @@ const redisClient = redis.createClient({host: 'localhost', // Địa chỉ của
 port: 6379,} ); 
 const RedisStore = require("connect-redis").default
 
-(async () => { 
-  await redisClient.connect(); 
-})(); 
+
 
 
 redisClient.on("ready", () => { 
@@ -29,6 +27,9 @@ redisClient.on("error", (err) => {
   console.log("Error in the Connection"); 
 }); 
 
+(async () => { 
+  await redisClient.connect(); 
+})(); 
 const mongoUrl = 'mongodb+srv://commercial:05timE2NuctQg0Yy@cluster0.wfto06b.mongodb.net/things?retryWrites=true&w=majority&appName=Cluster0';
 
 const db  = mysql.createPool({
