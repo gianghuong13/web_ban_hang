@@ -1,19 +1,17 @@
 const { Client } = require('@elastic/elasticsearch');
-
 const express = require('express');
 const cors = require('cors');
 const app = express();  
 const port = 3002;
 
-
 // Create an Elasticsearch client
 const client = new Client({
     cloud: {
-        id: '602f518ebd4f476181a808011cada467:dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvJGM0ZWQ2NmVjYTkzODQ4ZGRiNjcxYzAyNjljY2IzNWVkJDgxOTllOGJkZGRmZTQxMWJhMDY5ZjZhNTZjYTM0MGUy'
+        id: 'e979c66e01444994b94412f0362c3657:dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvJDBjODk1MThhZjFiYTRhMzA5MGU3YzI0YWJhOGM5NDZlJDVmMjlmN2ZkMWQ5MzQxNzU4YzAyMjVhM2IwNjBhMjNl'
     },
     auth: {
         username: 'elastic',
-        password: 'NY4y6DOymQtvL63CGRa0qylG'
+        password: 'dZojjl4itYPwUzCfOYAEzxdw'
     }
 });
 
@@ -21,12 +19,27 @@ app.use(cors());
 
 async function searchProducts(query) {
   try {
+
     const countResponse = await client.count({
-        index: 'productsfinal',
+        index: 'products',
         body: {
             query: {
-                match: {
-                    name: query
+                bool: {
+                    should: [
+                        {
+                            match: {
+                                name: {
+                                    query: query,
+                                    fuzziness: 'AUTO'
+                                }
+                            }
+                        },
+                        {
+                            wildcard: {
+                                name: `*${query}*`
+                            }
+                        }
+                    ]
                 }
             }
         }
@@ -35,22 +48,36 @@ async function searchProducts(query) {
     const totalMatches = countResponse.count;
 
     const body = await client.search({
-      index: 'productsfinal',
+      index: 'products',
       body: {
           query: {
-              match: {
-                  name: query
+              bool: {
+                  should: [
+                      {
+                          match: {
+                              name: {
+                                  query: query,
+                                  fuzziness: 'AUTO'
+                              }
+                          }
+                      },
+                      {
+                          wildcard: {
+                              name: `*${query}*`
+                          }
+                      }
+                  ]
               }
           },
-          size: totalMatches
+          size: totalMatches // Adjust size as needed
       }
   });
       if (!body) {
-          throw new Error('Khong co body');
+          throw new Error('No response body');
       }
       if (!body.hits) {
-        throw new Error('Khoi doc hits luon chu dau co hits');
-    }
+          throw new Error('No hits found');
+      }
       return body.hits.hits;
   } catch (error) {
       console.error(error);
